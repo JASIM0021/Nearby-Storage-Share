@@ -24,6 +24,13 @@ object MsgType {
     const val DELETE_FILE = "DELETE_FILE"
     const val TRANSFER_CANCEL = "TRANSFER_CANCEL"
     const val REVOKED = "REVOKED"
+
+    // Same-network (LAN) pairing and keep-alive. See com.nearbyshare.lan.LanPairing for how the code is derived.
+    const val PAIR_CHALLENGE = "PAIR_CHALLENGE"
+    const val PAIR_REVEAL = "PAIR_REVEAL"
+    const val PAIR_CONFIRM = "PAIR_CONFIRM"
+    const val PING = "PING"
+    const val PONG = "PONG"
 }
 
 object ErrorCode {
