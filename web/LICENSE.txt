@@ -1,0 +1,147 @@
+NEARBY STORAGE SHARE SOURCE-AVAILABLE LICENSE
+Version 1.0 - October 15, 2026
+
+Copyright (c) 2026 Sk Jasimudin (Todayintech Solution). All rights reserved, except for the rights
+expressly granted below.
+
+NOTE: This is a "source-available" license. It is NOT an open-source license as
+defined by the Open Source Initiative, because it does not allow publishing,
+selling or reselling. Please read it before you use the Software.
+
+In short: you may use the Software and change it for yourself. You may not
+publish it, sell it, or resell it - in original or modified form.
+
+
+1. DEFINITIONS
+
+"Software" means the Nearby Storage Share application, its source code, build
+scripts, documentation, graphics (including the app icon) and every other file
+in this distribution, in source or compiled form.
+
+"You" means the individual, or the single legal entity, using the Software
+under this License.
+
+"Modification" means any change, adaptation, translation or derivative work of
+the Software.
+
+"Publish" means to make the Software or a Modification available to anyone
+other than You (or, for an entity, its own employees and contractors acting
+for that entity), by any means. This includes uploading it to an app store,
+website, file-sharing service, package registry or public or shared source
+repository; posting it; emailing it or handing over copies; and hosting it for
+download or remote use by others.
+
+"Sell" means to exchange the Software or a Modification, or access to either,
+for money or any other consideration. This includes selling, reselling,
+renting, leasing, licensing for a fee, charging for access or support that is
+bundled with it, including it in a paid product, service or subscription, and
+offering it as a paid or advertising-funded service.
+
+"Author" means Sk Jasimudin (Todayintech Solution).
+
+
+2. WHAT YOU MAY DO
+
+Subject to this License, the Author grants You a non-exclusive, worldwide,
+royalty-free, non-transferable and non-sublicensable license to:
+
+  (a) download, copy, build, install and run the Software for Your own personal
+      use, or for the internal use of Your own organization;
+  (b) read, study and test the source code;
+  (c) modify the Software for Your own use; and
+  (d) keep the private copies You reasonably need for those purposes, such as
+      backups and Your own devices.
+
+Running the Software on devices You own or control, and letting other people's
+devices connect to it as part of the normal use of the Software, is not
+Publishing.
+
+
+3. WHAT YOU MAY NOT DO
+
+You may not, and may not allow anyone else to:
+
+  (a) Publish the Software or any Modification, in whole or in part, whether or
+      not for payment;
+  (b) Sell the Software or any Modification, or use either to provide a
+      commercial product, service or subscription to others;
+  (c) offer the Software or a Modification as a hosted or managed service to
+      third parties;
+  (d) remove or change copyright, license or attribution notices, or the
+      "source-available" note at the top of this License;
+  (e) use the Author's name, the name "Nearby Storage Share" or the app icon to
+      suggest that a Modification or a product is made, endorsed or approved by
+      the Author; or
+  (f) use the Software to break the law or to infringe the rights of others.
+
+
+4. MODIFICATIONS
+
+You own the changes You write, but a Modification is still derived from the
+Software and therefore stays under this License, including the restrictions in
+Section 3.
+
+If You send a Modification, patch or suggestion to the Author, You grant the
+Author a perpetual, worldwide, royalty-free, irrevocable license to use, modify
+and include it in the Software under any license terms the Author chooses.
+
+
+5. NOTICES
+
+This License, and the copyright notice above, must stay with every copy of the
+Software that You keep.
+
+
+6. THIRD-PARTY COMPONENTS
+
+The Software uses third-party components (for example AndroidX, Kotlin
+libraries and Google Play services). They are not covered by this License and
+remain under their own licenses, listed in the "Open-source notices" page.
+Nothing in this License limits Your rights under those licenses.
+
+
+7. OWNERSHIP
+
+The Software is licensed, not sold. All rights that are not expressly granted
+here are reserved by the Author.
+
+
+8. TERMINATION
+
+This License ends automatically if You break it. If You stop the breach and
+remove every Published or Sold copy within 30 days after the Author's written
+notice, Your rights are reinstated - unless You have already breached this
+License before. When this License ends, You must stop using the Software and
+delete Your copies and Modifications. Sections 7, 9, 10 and 11 continue to
+apply after termination.
+
+
+9. NO WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE, NON-INFRINGEMENT, AVAILABILITY AND DATA SAFETY. THE SOFTWARE STORES
+FILES ON OTHER PEOPLE'S PHONES AND IS NOT A BACKUP SERVICE: YOU USE IT AT YOUR
+OWN RISK.
+
+
+10. LIMITATION OF LIABILITY
+
+TO THE FULLEST EXTENT PERMITTED BY LAW, THE AUTHOR IS NOT LIABLE FOR ANY CLAIM,
+DAMAGES (INCLUDING LOSS OF DATA, LOSS OF PROFIT OR INDIRECT OR CONSEQUENTIAL
+DAMAGES) OR OTHER LIABILITY ARISING FROM OR IN CONNECTION WITH THE SOFTWARE OR
+ITS USE, WHETHER IN CONTRACT, TORT OR OTHERWISE. NOTHING IN THIS LICENSE
+EXCLUDES LIABILITY THAT CANNOT BE EXCLUDED BY LAW.
+
+
+11. GENERAL
+
+This License is governed by the laws of India, and the courts of competent jurisdiction in India can decide disputes about it. If
+a part of it cannot be enforced, the rest stays in force. A failure to enforce
+a right is not a waiver of it. This is the entire license for the Software; it
+replaces earlier statements about the license of the Software. The Author may
+publish new versions of this License; the version that came with Your copy
+applies to that copy.
+
+For permission to do something this License does not allow - for example to
+publish or sell the Software - contact contact@todayintech.in.

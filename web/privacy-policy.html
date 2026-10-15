@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy - Nearby Storage Share</title>
+<meta name="description" content="How Nearby Storage Share handles your data: no accounts, no servers, no tracking. Files and device details stay on the phones you choose.">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="site"><div class="bar">
+  <a class="brand" href="index.html"><img src="assets/icon.png" alt="" width="34" height="34">Nearby Storage Share</a>
+  <nav class="main" aria-label="Main">
+    <a href="privacy-policy.html" aria-current="page">Privacy Policy</a>
+    <a href="terms-and-conditions.html">Terms</a>
+    <a href="open-source-licenses.html">Open-source notices</a>
+    <a href="license.html">License</a>
+  </nav>
+</div></header>
+
+<main>
+<h1>Privacy Policy</h1>
+<p class="meta">Last updated: October 15, 2026 &middot; Applies to the Android app <strong>Nearby Storage Share</strong> (package <code>com.nearbyshare</code>)</p>
+
+<h2 id="summary">1. The short version</h2>
+<div class="card">
+<ul>
+  <li><strong>No accounts, no servers, no ads, no analytics.</strong> We do not run any server that receives your files or personal data.</li>
+  <li>Files and settings stay <strong>on the phones that use the app</strong>. Phones talk to each other directly over Bluetooth / Wi-Fi when they are near each other.</li>
+  <li>When you <strong>host</strong>, other people's files are stored on <strong>your</strong> phone, and you (the owner of that phone) can see and delete them. When you <strong>upload to someone else's phone</strong>, that person can see and delete your files.</li>
+  <li>We do not sell your data, and we do not share it with advertisers or data brokers.</li>
+  <li>You can erase everything by deleting the app's data or uninstalling it.</li>
+</ul>
+</div>
+
+<h2 id="who">2. Who is responsible</h2>
+<p>Nearby Storage Share is provided by Sk Jasimudin (Todayintech Solution) ("we", "us"). Because the app has no accounts or servers, we do not receive or hold the files, names or settings described below. They are held on your own devices, and on the devices you connect to.</p>
+
+<h2 id="data">3. Information the app handles</h2>
+<table>
+<thead><tr><th>Information</th><th>Where it is kept</th><th>Why</th><th>Leaves the phone?</th></tr></thead>
+<tbody>
+<tr><td>Device name (defaults to your phone's model; you can change it) and a random device ID created by the app</td><td>On your phone</td><td>So hosts and guests can recognize each other</td><td>Yes - sent to nearby devices you connect to; a host's name and ID are also visible to nearby devices that are scanning while sharing is on</td></tr>
+<tr><td>Pairing keys for hosts and guests you approved</td><td>On your phone, encrypted with a key held in the Android Keystore</td><td>To prove it is the same device on reconnect, without asking you to pair again</td><td>Only during pairing, over the encrypted connection</td></tr>
+<tr><td>Files you share or upload, and folders you create</td><td>On the <strong>host's</strong> phone: in the app's private storage, or in a folder the host chose</td><td>The purpose of the app</td><td>Only to the host or guest you are connected to</td></tr>
+<tr><td>File details: name, size, folder, SHA-256 checksum, dates</td><td>On the host's phone (and the guest's transfer list)</td><td>To list files, check them for corruption and enforce limits</td><td>Only to the connected device</td></tr>
+<tr><td>Permissions and limits for each approved device (read, upload, overwrite, delete, storage limit, expiry)</td><td>On the host's phone</td><td>To enforce what each guest is allowed to do</td><td>The guest is told what it may do</td></tr>
+<tr><td>Transfer history (file name, size, which device, result, error text)</td><td>On each phone involved</td><td>To show progress and history</td><td>No</td></tr>
+<tr><td>Security log (e.g. "pairing approved", "permission denied") with time stamps</td><td>On the host's phone</td><td>So the host can review activity</td><td>No</td></tr>
+<tr><td>Temporary copies of files you open or preview</td><td>In the app's cache on the phone that opened them</td><td>To open the file in another app</td><td>No; removed automatically after about a day</td></tr>
+<tr><td>Settings (storage limit, who may connect, default permissions, chosen folder)</td><td>On your phone</td><td>To remember your choices</td><td>No</td></tr>
+</tbody>
+</table>
+<p>The app does <strong>not</strong> read your contacts, messages, photos (except files you pick), microphone, camera or precise location, and it does not create an advertising ID or a user profile.</p>
+
+<h2 id="visible">4. What the other person can see</h2>
+<ul>
+  <li><strong>If you are the host:</strong> you can see the name and random ID of each phone that connects, the names, sizes and dates of the files it stores, and its activity in the security log. In "Visible folder" mode its files are saved in a folder you chose with their real names, so you and any app with access to that folder can read, change or delete them.</li>
+  <li><strong>If you are a guest:</strong> the host can see your device name, your random ID, and the names, sizes and contents of the files you upload. Only upload what you are comfortable with that person having. The host can delete your files at any time.</li>
+  <li>Guests are kept apart: one guest cannot see another guest's files through the app.</li>
+</ul>
+
+<h2 id="permissions">5. Android permissions and why we ask</h2>
+<table>
+<thead><tr><th>Permission</th><th>Reason</th></tr></thead>
+<tbody>
+<tr><td>Bluetooth (scan, advertise, connect), Nearby Wi-Fi devices, Wi-Fi and network state / change</td><td>To find and connect to nearby phones directly.</td></tr>
+<tr><td>Location (approximate and precise)</td><td>Android and Google's Nearby technology require this permission to scan for nearby devices on many versions. The app does <strong>not</strong> read, store or send your location.</td></tr>
+<tr><td>Notifications</td><td>To show hosting status, connection status and transfer progress (0-100%). Optional: transfers work without it.</td></tr>
+<tr><td>Foreground services</td><td>To keep hosting, an active connection or a transfer running while the app is not on screen. You always see a notification and can stop it.</td></tr>
+<tr><td>Access to a folder you pick</td><td>Only if you choose "Visible folder" or save/open files. Android asks you each time; the app can only reach the folder you select.</td></tr>
+</tbody>
+</table>
+
+<h2 id="security">6. How data is protected</h2>
+<ul>
+  <li>Devices connect through <strong>Google's Nearby Connections</strong>, which uses an encrypted connection. When two phones pair for the first time, both show the same code that you compare before approving.</li>
+  <li>After pairing, each device proves its identity with a shared secret on every reconnect. The secret is stored encrypted with the Android Keystore.</li>
+  <li>The host checks every request against what that guest is allowed to do, so a modified app cannot do more than the host permits. Files are checked with a SHA-256 checksum, and incomplete uploads never appear as finished files.</li>
+  <li>Backups are switched off for the app's data so files and keys are not copied to cloud backups or transferred to a new phone automatically.</li>
+  <li>The app does not add its own encryption to files at rest. In private storage they are protected by Android's app sandbox and your phone's own storage encryption. No method of storage or transmission is completely secure.</li>
+</ul>
+
+<h2 id="third">7. Third-party services</h2>
+<p>The app uses <strong>Google Play services (Nearby Connections)</strong> to find and connect to nearby devices. This is a Google component on your phone and is governed by <a href="https://policies.google.com/privacy" rel="noopener">Google's Privacy Policy</a>; Google may process connection-related information as described there. We do not control it. The app contains no advertising or analytics libraries and no other third-party data collection. See the <a href="open-source-licenses.html">open-source notices</a> for the libraries used.</p>
+
+<h2 id="notcollect">8. What we do not do</h2>
+<ul>
+  <li>We do not collect, receive or store your files, device names or usage data on any server.</li>
+  <li>We do not sell, rent or trade personal information, and we do not use it for advertising or profiling.</li>
+  <li>We do not track you across apps or websites.</li>
+</ul>
+
+<h2 id="retention">9. Keeping and deleting data</h2>
+<ul>
+  <li>Data stays on a phone until you delete it. In the app you can delete files (where permitted), revoke or block a device, clear finished transfers, or stop sharing at any time.</li>
+  <li>To remove everything the app holds on a phone, use <em>Android Settings &rarr; Apps &rarr; Nearby Storage Share &rarr; Storage &rarr; Clear data</em>, or uninstall the app.</li>
+  <li>Files you uploaded to <em>another person's</em> phone are on their device; ask them to delete them, or delete them yourself if the host allowed deleting.</li>
+  <li>If you chose a visible folder, files in it are ordinary files and stay there until deleted, even if you uninstall the app.</li>
+</ul>
+
+<h2 id="rights">10. Your choices and rights</h2>
+<p>Because we do not hold your data on any server, you control it directly on your devices as described above. If you are in India, the Digital Personal Data Protection Act, 2023 and the Information Technology Act, 2000 apply to personal data where relevant, and you may have rights to obtain information about your personal data, to have it corrected or erased, to withdraw consent, and to have a grievance addressed. People in other regions (for example under the GDPR, UK GDPR or the California Consumer Privacy Act) may have similar rights. To exercise a right or raise a concern, write to <a href="mailto:contact@todayintech.in">contact@todayintech.in</a>; we will acknowledge your request and respond within 30 days.</p>
+
+<h2 id="children">11. Children</h2>
+<p>The app is not intended for anyone under 18. Under Indian law a minor cannot enter into a binding contract and a parent or legal guardian's consent is needed to process a child's personal data, so a parent or guardian should install and manage the app for a minor. We do not knowingly collect personal information from children. Because the app lets people store files on each other's phones, a parent or guardian should supervise any use by a minor.</p>
+
+<h2 id="changes">12. Changes to this policy</h2>
+<p>If the way the app handles data changes, we will update this page and the "Last updated" date. Significant changes will also be described in the app's release notes.</p>
+
+<h2 id="contact">13. Contact</h2>
+<p>Sk Jasimudin (Todayintech Solution)<br>Email: <a href="mailto:contact@todayintech.in">contact@todayintech.in</a><br>This is also the contact for privacy complaints and grievances; we reply within 30 days.</p>
+</main>
+
+<footer>
+  <p>&copy; 2026 Sk Jasimudin (Todayintech Solution) &middot; Nearby Storage Share</p>
+  <nav class="main" aria-label="Footer"><a href="index.html">Home</a> <a href="privacy-policy.html">Privacy Policy</a> <a href="terms-and-conditions.html">Terms</a> <a href="open-source-licenses.html">Open-source notices</a> <a href="license.html">License</a></nav>
+</footer>
+</body>
+</html>

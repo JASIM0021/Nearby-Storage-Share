@@ -1,0 +1,4 @@
+﻿<resources>
+    <!-- Deep blue behind the launcher icon artwork; also the window background while the app starts. -->
+    <color name="ic_launcher_background">#04215E</color>
+</resources>

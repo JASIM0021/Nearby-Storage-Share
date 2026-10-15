@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Nearby Storage Share</string>
+    <string name="host_channel_name">Storage sharing</string>
+    <string name="host_channel_desc">Shown while this phone is sharing storage with nearby devices.</string>
+</resources>

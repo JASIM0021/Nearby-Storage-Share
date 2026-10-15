@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open-source notices - Nearby Storage Share</title>
+<meta name="description" content="Third-party open-source software used by Nearby Storage Share, with versions and licenses.">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="site"><div class="bar">
+  <a class="brand" href="index.html"><img src="assets/icon.png" alt="" width="34" height="34">Nearby Storage Share</a>
+  <nav class="main" aria-label="Main">
+    <a href="privacy-policy.html">Privacy Policy</a>
+    <a href="terms-and-conditions.html">Terms</a>
+    <a href="open-source-licenses.html" aria-current="page">Open-source notices</a>
+    <a href="license.html">License</a>
+  </nav>
+</div></header>
+
+<main>
+<h1>Open-source notices</h1>
+<p class="lead">Nearby Storage Share is built on top of excellent open-source software. This page lists those components and the licenses they are used under.</p>
+<p class="meta">Last updated: October 15, 2026 &middot; Versions are those used in app version 1.4.0</p>
+
+<div class="notice"><p><strong>About the app's own license:</strong> the Nearby Storage Share code itself is <em>source-available</em>, not open source: you may use and modify it for yourself, but not publish, sell or resell it. See the <a href="license.html">License page</a>. The components below keep their own, different licenses.</p></div>
+
+<h2 id="components">Third-party components</h2>
+<table>
+<thead><tr><th>Component</th><th>Version</th><th>License</th><th>Project</th></tr></thead>
+<tbody>
+<tr><td>AndroidX Core KTX</td><td>1.17.0</td><td>Apache-2.0</td><td><a href="https://developer.android.com/jetpack/androidx/releases/core" rel="noopener">developer.android.com</a></td></tr>
+<tr><td>AndroidX Activity (Compose)</td><td>1.11.0</td><td>Apache-2.0</td><td><a href="https://developer.android.com/jetpack/androidx/releases/activity" rel="noopener">developer.android.com</a></td></tr>
+<tr><td>AndroidX Navigation (Compose)</td><td>2.9.4</td><td>Apache-2.0</td><td><a href="https://developer.android.com/jetpack/androidx/releases/navigation" rel="noopener">developer.android.com</a></td></tr>
+<tr><td>AndroidX Lifecycle (runtime-compose, viewmodel-compose)</td><td>2.9.4</td><td>Apache-2.0</td><td><a href="https://developer.android.com/jetpack/androidx/releases/lifecycle" rel="noopener">developer.android.com</a></td></tr>
+<tr><td>AndroidX Room (runtime, ktx) and the AndroidX SQLite libraries</td><td>2.8.1</td><td>Apache-2.0</td><td><a href="https://developer.android.com/jetpack/androidx/releases/room" rel="noopener">developer.android.com</a></td></tr>
+<tr><td>AndroidX DocumentFile</td><td>1.1.0</td><td>Apache-2.0</td><td><a href="https://developer.android.com/jetpack/androidx/releases/documentfile" rel="noopener">developer.android.com</a></td></tr>
+<tr><td>Jetpack Compose (UI, Material 3, Material Icons Extended) via the Compose BOM</td><td>BOM 2025.09.00</td><td>Apache-2.0</td><td><a href="https://developer.android.com/jetpack/compose" rel="noopener">developer.android.com</a></td></tr>
+<tr><td>Material Icons</td><td>(with Compose)</td><td>Apache-2.0</td><td><a href="https://fonts.google.com/icons" rel="noopener">fonts.google.com/icons</a></td></tr>
+<tr><td>Kotlin standard library</td><td>2.2.20</td><td>Apache-2.0</td><td><a href="https://kotlinlang.org" rel="noopener">kotlinlang.org</a></td></tr>
+<tr><td>kotlinx.coroutines (Android, Play services)</td><td>1.10.2</td><td>Apache-2.0</td><td><a href="https://github.com/Kotlin/kotlinx.coroutines" rel="noopener">github.com/Kotlin/kotlinx.coroutines</a></td></tr>
+<tr><td>Android Open Source Project (platform APIs used at runtime)</td><td>-</td><td>Apache-2.0</td><td><a href="https://source.android.com" rel="noopener">source.android.com</a></td></tr>
+</tbody>
+</table>
+<p>These libraries also bring in their own dependencies, which are distributed under the same Apache-2.0 license unless stated otherwise in the respective project.</p>
+
+<h2 id="proprietary">Not open source: Google Play services</h2>
+<p>The app calls <strong>Google Play services - Nearby</strong> (client library <code>play-services-nearby</code> 19.3.0) to discover and connect to nearby devices. This is proprietary software provided by Google and is used under the <a href="https://developers.google.com/terms" rel="noopener">Google APIs Terms of Service</a> and the Android SDK terms. It runs on your device as part of Google Play services and is not part of the open-source code listed above.</p>
+
+<h2 id="tools">Build and test tools (not shipped inside the app)</h2>
+<p>Android Gradle Plugin, Kotlin Symbol Processing (KSP) and Gradle (Apache-2.0); JUnit 4 (Eclipse Public License 1.0), used only for tests.</p>
+
+<h2 id="apache">Apache License 2.0</h2>
+<p>The components marked Apache-2.0 are licensed as follows. The complete license text is in <a href="licenses/APACHE-2.0.txt">licenses/APACHE-2.0.txt</a> and at <a href="https://www.apache.org/licenses/LICENSE-2.0" rel="noopener">apache.org/licenses/LICENSE-2.0</a>.</p>
+<div class="card">
+<p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use these files except in compliance with the License. You may obtain a copy of the License at <a href="https://www.apache.org/licenses/LICENSE-2.0" rel="noopener">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
+<p>Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.</p>
+</div>
+<p>Copyright notices belong to the respective authors, for example &copy; The Android Open Source Project, &copy; Google LLC, and &copy; JetBrains s.r.o. and Kotlin contributors.</p>
+
+<h2 id="own">Components created for this app</h2>
+<p>The app's own source code, user interface and icon artwork are covered by the <a href="license.html">Nearby Storage Share Source-Available License</a>.</p>
+</main>
+
+<footer>
+  <p>&copy; 2026 Sk Jasimudin (Todayintech Solution) &middot; Nearby Storage Share</p>
+  <nav class="main" aria-label="Footer"><a href="index.html">Home</a> <a href="privacy-policy.html">Privacy Policy</a> <a href="terms-and-conditions.html">Terms</a> <a href="open-source-licenses.html">Open-source notices</a> <a href="license.html">License</a></nav>
+</footer>
+</body>
+</html>
