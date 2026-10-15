@@ -101,7 +101,7 @@ private fun openReceived(engine: HostEngine, r: HostEngine.Received): String? = 
 /** Opens File Explorer with the file selected. */
 private fun showInFolder(f: java.io.File?): String? {
     if (f == null) return "That file is missing on this PC."
-    return runCatching { ProcessBuilder("explorer.exe", "/select,${f.absolutePath}").start(); null }.getOrElse { "Could not open File Explorer." }
+    return runCatching { ProcessBuilder("explorer.exe", "/select,", f.absolutePath).start(); null }.getOrElse { "Could not open File Explorer." }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
