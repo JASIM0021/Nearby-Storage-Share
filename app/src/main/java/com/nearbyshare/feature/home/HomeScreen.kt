@@ -93,6 +93,13 @@ fun HomeScreen(host: HostViewModel, guest: GuestViewModel, navigate: (String) ->
         onDenied = { notify("Nearby permissions are needed to share storage") },
     )
 
+    // First time sharing: ask once for a normal folder, so guest files can be browsed in the file manager.
+    val pickFolder = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri == null) notify("Choose a folder to share, or pick Hidden storage in Settings")
+        else host.useVisibleFolder(uri) { err -> if (err != null) notify(err) else askPermissions() }
+    }
+    val needsFolder = cfg?.let { it.storageMode == StorageMode.PRIVATE && it.visibleTreeUri == null } == true && used == 0L
+
     val enabled = cfg?.sharingEnabled == true
     val locationLabel = if (cfg?.storageMode == StorageMode.VISIBLE) folderName ?: "Visible folder" else "Internal storage"
 
@@ -140,7 +147,7 @@ fun HomeScreen(host: HostViewModel, guest: GuestViewModel, navigate: (String) ->
                                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
-                        Switch(checked = enabled, onCheckedChange = { if (it) askPermissions() else host.setSharing(false) })
+                        Switch(checked = enabled, onCheckedChange = { if (!it) host.setSharing(false) else if (needsFolder) pickFolder.launch(android.provider.DocumentsContract.buildDocumentUri("com.android.externalstorage.documents", "primary:Documents")) else askPermissions() })
                     }
                     when {
                         enabled && advertising -> Pill("Visible to nearby devices", Mint, live = true)
@@ -158,6 +165,10 @@ fun HomeScreen(host: HostViewModel, guest: GuestViewModel, navigate: (String) ->
                     ActionCard("Find hosts", Icons.Rounded.WifiTethering, Mint, Modifier.weight(1f)) { navigate("nearby") }
                     ActionCard("My files", Icons.Rounded.FolderOpen, ElectricBlue, Modifier.weight(1f)) { navigate("files") }
                     ActionCard("Devices", Icons.Rounded.Shield, Violet, Modifier.weight(1f)) { navigate("access") }
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    ActionCard("Received files", Icons.Rounded.FolderOpen, Amber, Modifier.weight(1f)) { navigate("received") }
+                    androidx.compose.foundation.layout.Spacer(Modifier.weight(2f))
                 }
 
                 SectionCard {

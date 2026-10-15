@@ -192,12 +192,12 @@ fun HostScreen(app: DesktopApp) {
                 Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Heading("Where files are stored")
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Pick("Private (hidden)", cfg.storageMode == StorageMode.PRIVATE) { engine.usePrivateStorage(); folderError = null }
-                        Pick("A folder I choose", cfg.storageMode == StorageMode.VISIBLE) {
+                        Pick("Visible folder (recommended)", cfg.storageMode == StorageMode.VISIBLE) {
                             val dir = cfg.visibleDir
                             if (dir != null) folderError = engine.useVisibleFolder(dir)
                             else chooseFolder()?.let { folderError = engine.useVisibleFolder(it) }
                         }
+                        Pick("Hidden (advanced)", cfg.storageMode == StorageMode.PRIVATE) { engine.usePrivateStorage(); folderError = null }
                     }
                     if (cfg.storageMode == StorageMode.PRIVATE) {
                         Text("Files are kept in this app's own folder under random names. Only this app can read them.", color = Muted, fontSize = 13.sp)

@@ -239,6 +239,7 @@ fun AppRoot(host: HostViewModel = viewModel(), guest: GuestViewModel = viewModel
                         composable("files") { Readable { FilesScreen(guest, navigate) } }
                         composable("transfers") { Readable { TransfersScreen(guest) } }
                         composable("settings") { SettingsScreen(host, navigate, notify) }
+                        composable("received") { com.nearbyshare.feature.received.ReceivedFilesScreen(host, notify) }
                         composable("access") { AccessScreen(host, navigate = { nav.navigate(it) }) }
                         composable("device/{id}") { entry ->
                             DeviceDetailScreen(entry.arguments?.getString("id").orEmpty(), host)

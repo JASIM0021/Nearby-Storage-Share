@@ -80,6 +80,9 @@ interface FileDao {
     @Query("SELECT * FROM shared_files WHERE file_id = :id AND deleted_at IS NULL")
     suspend fun get(id: String): SharedFile?
 
+    @Query("SELECT * FROM shared_files WHERE is_folder = 0 AND deleted_at IS NULL ORDER BY updated_at DESC LIMIT :n")
+    suspend fun recentFiles(n: Int): List<SharedFile>
+
     @Query(
         """SELECT * FROM shared_files
            WHERE owner_device_id = :owner AND deleted_at IS NULL

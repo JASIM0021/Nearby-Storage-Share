@@ -39,6 +39,13 @@ class HostService(private val scope: CoroutineScope, dataDir: File, private val 
         engine.onDeviceDropped = { server.disconnectDevice(it) }
         // a previous run may have ended with sharing "on": come back switched off until the user starts it again
         engine.setSharing(false)
+        // A first run shares a normal folder you can open in File Explorer. Hidden storage is an advanced option.
+        if (engine.config.value.visibleDir == null && engine.devices.value.isEmpty()) {
+            runCatching {
+                val dir = File(System.getProperty("user.home"), "Documents/Nearby Storage Share").apply { mkdirs() }
+                engine.useVisibleFolder(dir.absolutePath)
+            }
+        }
     }
 
     fun start() {
