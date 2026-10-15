@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 // host server and guest client. No Android classes, so the Android app and the Windows app share it.
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    `java-test-fixtures`
 }
 
 java {
@@ -23,6 +24,13 @@ dependencies {
     // Only the JVM (desktop/test) identity generator needs this; Android uses the Keystore instead.
     compileOnly(libs.bouncycastle.pkix)
 
+    // the in-memory host used by tests here and in the desktop module
+    testFixturesImplementation(libs.kotlinx.coroutines.core)
+    testFixturesCompileOnly(libs.android.json)
+    testFixturesCompileOnly(libs.bouncycastle.pkix)
+    testFixturesRuntimeOnly(libs.android.json)
+    testFixturesRuntimeOnly(libs.bouncycastle.pkix)
+
     testImplementation(libs.android.json)
     testImplementation(libs.bouncycastle.pkix)
     testImplementation(libs.junit)
@@ -32,4 +40,10 @@ dependencies {
 tasks.test {
     useJUnit()
     testLogging { events("passed", "skipped", "failed"); showStandardStreams = false }
+}
+
+// Try a guest app by hand against an in-memory host: .\gradlew :lan-core:demoHost
+tasks.register<JavaExec>("demoHost") {
+    classpath = sourceSets["testFixtures"].runtimeClasspath
+    mainClass.set("com.nearbyshare.lan.DemoHostKt")
 }
