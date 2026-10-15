@@ -23,7 +23,7 @@ If any of these change, update them in every page, in `../LICENSE`, then copy `.
 
 ## Keeping the documents true
 
-These pages describe what the app does in Android version 1.5.0 and Windows app version 1.0.0. Update the Privacy Policy (and its "Last updated" date) whenever the app's
+These pages describe what the app does in Android version 1.5.0 and Windows app version 1.1.0. Update the Privacy Policy (and its "Last updated" date) whenever the app's
 data handling changes - for example if you add analytics, accounts, a server, or new permissions - and update the version and library
 list in `open-source-licenses.html` when dependencies change (`gradle/libs.versions.toml`).
 

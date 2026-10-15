@@ -34,6 +34,7 @@ import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.InsertDriveFile
 import androidx.compose.material.icons.rounded.OpenInNew
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.WifiTethering
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -76,11 +77,11 @@ import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
 
-private val Blue = Color(0xFF4D9BFF)
-private val Mint = Color(0xFF3DDC84)
-private val Card = Color(0xFF0E1C3A)
-private val Edge = Color(0xFF2E5399)
-private val Muted = Color(0xFFBBC9E4)
+internal val Blue = Color(0xFF4D9BFF)
+internal val Mint = Color(0xFF3DDC84)
+internal val Card = Color(0xFF0E1C3A)
+internal val Edge = Color(0xFF2E5399)
+internal val Muted = Color(0xFFBBC9E4)
 
 @Composable
 fun NearbyTheme(content: @Composable () -> Unit) {
@@ -105,7 +106,7 @@ fun formatBytes(bytes: Long): String {
 }
 
 @Composable
-private fun Panel(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+internal fun Panel(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Box(
         modifier.clip(RoundedCornerShape(22.dp)).background(Brush.verticalGradient(listOf(Card, Color(0xFF09122A))))
             .border(1.dp, Edge.copy(alpha = 0.7f), RoundedCornerShape(22.dp)),
@@ -113,14 +114,14 @@ private fun Panel(modifier: Modifier = Modifier, content: @Composable () -> Unit
 }
 
 @Composable
-private fun Chip(text: String, color: Color) {
+internal fun Chip(text: String, color: Color) {
     Box(Modifier.clip(RoundedCornerShape(50)).background(color.copy(alpha = 0.16f)).border(1.dp, color.copy(alpha = 0.4f), RoundedCornerShape(50)).padding(horizontal = 10.dp, vertical = 3.dp)) {
         Text(text, color = color, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 
 @Composable
-private fun Tile(icon: ImageVector, tint: Color, size: Int = 44) {
+internal fun Tile(icon: ImageVector, tint: Color, size: Int = 44) {
     Box(Modifier.size(size.dp).clip(RoundedCornerShape(14.dp)).background(tint.copy(alpha = 0.16f)).border(1.dp, tint.copy(alpha = 0.35f), RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
         Icon(icon, null, Modifier.size((size / 2).dp), tint = tint)
     }
@@ -137,10 +138,18 @@ fun AppRoot(app: DesktopApp) {
         Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFF050B18), Color(0xFF0A1A3C)))),
         color = Color.Transparent, contentColor = MaterialTheme.colorScheme.onBackground,
     ) {
-        when (app.conn) {
-            is Conn.Connected -> BrowserScreen(app)
-            else -> HostsScreen(app)
+        var mode by remember { mutableStateOf(0) }
+        when {
+            app.conn is Conn.Connected -> BrowserScreen(app)
+            else -> Column(Modifier.fillMaxSize()) {
+                Row(Modifier.fillMaxWidth().padding(start = 28.dp, top = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ModeTab("Use nearby storage", mode == 0) { mode = 0 }
+                    ModeTab(if (app.host.running) "Share my storage · on" else "Share my storage", mode == 1) { mode = 1 }
+                }
+                Box(Modifier.weight(1f)) { if (mode == 0) HostsScreen(app) else HostScreen(app) }
+            }
         }
+        HostApprovalHost(app)
         (app.conn as? Conn.Pairing)?.let { PairingDialog(app, it) }
         app.message?.let { msg ->
             AlertDialog(
@@ -154,6 +163,15 @@ fun AppRoot(app: DesktopApp) {
 }
 
 // ---- finding and connecting to a host --------------------------------------------------------------------------------------
+
+@Composable
+private fun ModeTab(text: String, selected: Boolean, onClick: () -> Unit) {
+    val c = if (selected) Blue else Muted
+    Box(
+        Modifier.clip(RoundedCornerShape(50)).background(if (selected) Blue.copy(alpha = 0.22f) else Color.Transparent)
+            .border(1.dp, c.copy(alpha = if (selected) 0.9f else 0.4f), RoundedCornerShape(50)).clickable(onClick = onClick).padding(horizontal = 18.dp, vertical = 9.dp),
+    ) { Text(text, color = c, fontWeight = FontWeight.SemiBold) }
+}
 
 @Composable
 private fun HostsScreen(app: DesktopApp) {
@@ -281,6 +299,7 @@ private fun BrowserScreen(app: DesktopApp) {
     var newFolder by remember { mutableStateOf(false) }
     var renaming by remember { mutableStateOf<RemoteFile?>(null) }
     var deleting by remember { mutableStateOf<RemoteFile?>(null) }
+    var query by remember { mutableStateOf("") }
 
     Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -328,6 +347,11 @@ private fun BrowserScreen(app: DesktopApp) {
             }) { Icon(Icons.Rounded.CloudUpload, null, Modifier.size(18.dp)); Text("  Upload") }
             IconButton({ app.refresh() }) { Icon(Icons.Rounded.Refresh, "Refresh") }
         }
+
+        if (perms?.read == true) OutlinedTextField(
+            query, { query = it; app.search(it) }, singleLine = true, modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("Search my files on this host") }, leadingIcon = { Icon(Icons.Rounded.Search, null) },
+        )
 
         Panel(Modifier.fillMaxWidth().weight(1f)) {
             when {
@@ -416,14 +440,17 @@ private fun TransferRow(t: TransferItem) {
                 Icon(Icons.Rounded.Error, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
                 Text(t.status.removePrefix("Failed: "), color = MaterialTheme.colorScheme.error, fontSize = 12.sp, maxLines = 1, modifier = Modifier.widthIn(max = 260.dp))
             }
-            t.status == "Active" -> Text("${if (t.total > 0) (t.bytes * 100 / t.total) else 0}%", color = Muted)
+            t.status == "Active" -> Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("${if (t.total > 0) (t.bytes * 100 / t.total) else 0}%", color = Muted)
+                TextButton({ t.cancel() }) { Text("Cancel") }
+            }
             else -> Text(t.status, color = Muted)
         }
     }
 }
 
 @Composable
-private fun NameDialog(title: String, initial: String, action: String, onDismiss: () -> Unit, onOk: (String) -> Unit) {
+internal fun NameDialog(title: String, initial: String, action: String, onDismiss: () -> Unit, onOk: (String) -> Unit) {
     var text by remember { mutableStateOf(initial) }
     AlertDialog(
         onDismissRequest = onDismiss,

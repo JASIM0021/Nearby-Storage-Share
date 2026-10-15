@@ -11,8 +11,24 @@ so the protocol, pairing and encryption are identical.
   remembered (its certificate is pinned) and reconnecting needs no code.
 - Browse folders, upload (several files), save to the PC, open a file in its default app (a cached copy is downloaded first),
   create folders, rename and delete. Buttons appear only for what the host has allowed this PC to do.
+- Search your own files on the host, and cancel a running transfer.
 
-Not in this version: **hosting from Windows** (a PC cannot share its storage yet) and showing the host as a drive in File Explorer.
+## Sharing this PC's storage (host)
+
+Open the **Share my storage** tab and switch sharing on. Everything the Android host offers is here:
+
+- Storage to share (5 / 10 / 20 / 50 GB or a custom number); the PC always keeps a 2 GB safety reserve free.
+- Where files go: **Private** (hidden, random names inside `%APPDATA%\NearbyStorageShare\host`) or **a folder you choose**
+  (one subfolder per guest with real file names, visible in File Explorer).
+- Who can connect: **Private** (only devices you approved), **Ask me each time** (code check + Allow), or **Open on this network**.
+- Up to 1/2/3/5/8 devices at once, default permissions, and per device: storage limit, access duration, read / upload /
+  replace / delete / create-folder, revoke, block, require new pairing, and an activity log.
+- Closing the window while sharing keeps it running in the tray; Windows is kept awake while sharing; optional start with Windows.
+- Quota is enforced on the host: space is reserved before an upload starts and the file is checksum-verified before it appears.
+
+The first time sharing starts, allow the app through Windows Firewall on **Private networks**.
+
+Not in this version: showing a host as a drive in File Explorer on Windows (the Android app has this).
 
 ## Using it
 

@@ -9,7 +9,14 @@ import java.net.InetAddress
 import java.util.UUID
 
 /** This PC's id and display name. The id is random and created once. */
-class Device(val id: String, val name: String) {
+class Device(val id: String, name: String) {
+    @Volatile var name: String = name
+
+    fun save(file: File) {
+        file.parentFile?.mkdirs()
+        file.writeText(JSONObject().put("id", id).put("name", name).toString())
+    }
+
     companion object {
         fun loadOrCreate(file: File): Device {
             file.parentFile?.mkdirs()

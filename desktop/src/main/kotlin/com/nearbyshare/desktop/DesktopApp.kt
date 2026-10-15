@@ -50,6 +50,9 @@ class TransferItem(val name: String, val upload: Boolean) {
     /** "Preparing", "Active", "Done" or "Failed: ..." */
     var status by mutableStateOf("Preparing")
     val finished: Boolean get() = status == "Done" || status.startsWith("Failed")
+
+    @Volatile var job: Job? = null
+    fun cancel() { job?.cancel() }
 }
 
 /**
@@ -58,8 +61,9 @@ class TransferItem(val name: String, val upload: Boolean) {
  */
 class DesktopApp(private val scope: CoroutineScope, val dataDir: File = defaultDataDir()) {
     val device: Device = Device.loadOrCreate(File(dataDir, "device.json"))
-    private val identity = JvmIdentity.loadOrCreate(dataDir, "Nearby Storage Share (${device.name})")
+    internal val identity = JvmIdentity.loadOrCreate(dataDir, "Nearby Storage Share (${device.name})")
     val pins = FilePins(File(dataDir, "hosts.json"))
+    val host = HostService(scope, dataDir, device, identity)
     private val client = LanGuestClient(identity, device.id, { device.name }, scope)
     private val listener = BeaconListener(scope, selfId = device.id)
     private val cacheDir = File(dataDir, "cache").apply { mkdirs() }
@@ -96,6 +100,7 @@ class DesktopApp(private val scope: CoroutineScope, val dataDir: File = defaultD
     fun stopScanning() = listener.stop()
 
     fun shutdown() {
+        host.shutdown()
         listener.stop()
         disconnect()
     }
@@ -257,6 +262,7 @@ class DesktopApp(private val scope: CoroutineScope, val dataDir: File = defaultD
             for (f in files) {
                 val item = TransferItem(f.name, upload = true)
                 transfers.add(0, item)
+                val one = launch {
                 try {
                     val (size, sha) = digestOf { f.inputStream() }
                     item.total = size
@@ -269,6 +275,9 @@ class DesktopApp(private val scope: CoroutineScope, val dataDir: File = defaultD
                 } catch (e: Throwable) {
                     item.status = "Failed: ${e.message ?: "error"}"
                 }
+                }
+                item.job = one
+                one.join()
             }
             refresh()
         }
@@ -278,7 +287,7 @@ class DesktopApp(private val scope: CoroutineScope, val dataDir: File = defaultD
     fun download(file: RemoteFile, dest: File, onDone: (File) -> Unit = {}) {
         val item = TransferItem(file.name, upload = false)
         transfers.add(0, item)
-        scope.launch(Dispatchers.IO) {
+        item.job = scope.launch(Dispatchers.IO) {
             try {
                 fetch(file, dest, item)
                 onDone(dest)
@@ -315,6 +324,19 @@ class DesktopApp(private val scope: CoroutineScope, val dataDir: File = defaultD
             dest.delete()
             throw e
         }
+    }
+
+    /** Searches the guest's own files on the host (all folders). An empty query goes back to the folder view. */
+    fun search(query: String) {
+        if (query.isBlank()) { refresh(); return }
+        launchOp("Search failed") { items = sess().search(query.trim()) }
+    }
+
+    fun renameDevice(newName: String) {
+        val n = newName.trim().take(40)
+        if (n.isEmpty()) return
+        device.name = n
+        device.save(File(dataDir, "device.json"))
     }
 
     fun clearFinishedTransfers() = transfers.removeAll { it.finished }

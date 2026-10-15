@@ -13,6 +13,7 @@ import kotlinx.coroutines.cancel
 import org.jetbrains.skia.EncodedImageFormat
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import androidx.compose.foundation.layout.fillMaxSize
 import java.io.File
 import java.nio.file.Files
 import java.util.UUID
@@ -84,3 +85,47 @@ class ScreenshotTest {
         }
     }
 }
+
+@OptIn(ExperimentalComposeUiApi::class)
+class HostScreenshotTest {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    @Test
+    fun rendersTheHostScreen() {
+        val host = DesktopApp(scope, Files.createTempDirectory("nss-shot-h").toFile())
+        val guest = DesktopApp(scope, Files.createTempDirectory("nss-shot-g").toFile())
+        try {
+            host.host.engine.updateConfig { it.copy(accessMode = com.nearbyshare.host.AccessMode.OPEN, safetyReserveBytes = 0) }
+            host.host.start()
+            guest.connectByAddress("127.0.0.1:${host.host.port}")
+            val end = System.currentTimeMillis() + 20_000
+            while (guest.conn !is Conn.Pairing && System.currentTimeMillis() < end) Thread.sleep(25)
+            guest.confirmPairing(true)
+            while (guest.conn !is Conn.Connected && System.currentTimeMillis() < end) Thread.sleep(25)
+            val f = File.createTempFile("share", ".bin").apply { writeBytes(ByteArray(3_000_000) { 1 }); deleteOnExit() }
+            guest.upload(listOf(f))
+            while (host.host.engine.usedBytes.value == 0L && System.currentTimeMillis() < end) Thread.sleep(25)
+
+            val scene = ImageComposeScene(width = 1100, height = 1900, density = Density(1f)) {
+                NearbyTheme {
+                    androidx.compose.material3.Surface(
+                        androidx.compose.ui.Modifier.fillMaxSizeCompat(),
+                        color = androidx.compose.ui.graphics.Color(0xFF07112A), contentColor = androidx.compose.ui.graphics.Color.White,
+                    ) { HostScreen(host) }
+                }
+            }
+            try {
+                scene.render(0L); scene.render(500_000_000L)
+                val png = scene.render(1_000_000_000L).encodeToData(EncodedImageFormat.PNG)!!.bytes
+                File("build/screenshots").apply { mkdirs() }.resolve("4-host-screen.png").writeBytes(png)
+                assertTrue(png.size > 5_000)
+            } finally {
+                scene.close()
+            }
+        } finally {
+            guest.shutdown(); host.shutdown(); scope.cancel()
+        }
+    }
+}
+
+private fun androidx.compose.ui.Modifier.fillMaxSizeCompat(): androidx.compose.ui.Modifier = this.then(androidx.compose.ui.Modifier.fillMaxSize())

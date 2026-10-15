@@ -44,7 +44,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Msi, TargetFormat.Exe)
             packageName = "NearbyStorageShare"
-            packageVersion = "1.0.0"
+            packageVersion = "1.1.0"
             description = "Share and use storage on nearby phones and PCs"
             vendor = "Todayintech Solution"
             copyright = "Copyright (c) 2026 Sk Jasimudin (Todayintech Solution)"
