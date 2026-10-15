@@ -92,6 +92,18 @@ private fun chooseFolder(): String? {
 
 private fun whenText(ms: Long?): String = if (ms == null) "never" else DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(ms))
 
+private fun openReceived(engine: HostEngine, r: HostEngine.Received): String? = runCatching {
+    val f = engine.openableCopy(r.file) ?: return "That file is missing on this PC."
+    java.awt.Desktop.getDesktop().open(f)
+    null
+}.getOrElse { "No app on this PC can open ${r.file.displayName}. Use Show in folder." }
+
+/** Opens File Explorer with the file selected. */
+private fun showInFolder(f: java.io.File?): String? {
+    if (f == null) return "That file is missing on this PC."
+    return runCatching { ProcessBuilder("explorer.exe", "/select,${f.absolutePath}").start(); null }.getOrElse { "Could not open File Explorer." }
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HostScreen(app: DesktopApp) {
@@ -108,6 +120,10 @@ fun HostScreen(app: DesktopApp) {
     var folderError by remember { mutableStateOf<String?>(null) }
     var openDevice by remember { mutableStateOf<String?>(null) }
     var renaming by remember { mutableStateOf(false) }
+    var showAllFiles by remember { mutableStateOf(false) }
+    var openError by remember { mutableStateOf<String?>(null) }
+    val changes by engine.changes.collectAsState()
+    val received = remember(changes) { engine.receivedFiles() }
     var autostart by remember { mutableStateOf(HostService.autostartEnabled()) }
     var deviceName by remember { mutableStateOf(app.device.name) }
     val disk = remember(cfg.storageMode, cfg.visibleDir, used) { engine.diskInfo() }
@@ -258,6 +274,32 @@ fun HostScreen(app: DesktopApp) {
                             }
                             Chip(state.first, state.second)
                         }
+                    }
+                }
+            }
+
+            // --- everything guests have sent
+            Panel(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Heading("Received files")
+                    val shown = if (showAllFiles) received else received.take(8)
+                    if (received.isEmpty()) Text("Files that guests upload will be listed here.", color = Muted)
+                    shown.forEach { r ->
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Column(Modifier.weight(1f)) {
+                                Text(r.file.displayName, fontWeight = FontWeight.SemiBold, maxLines = 1)
+                                val where = if (r.folder.isEmpty()) "" else " · in ${r.folder}"
+                                Text("${r.deviceName} · ${formatBytes(r.file.sizeBytes)} · ${whenText(r.file.updatedAt)}$where", color = Muted, fontSize = 12.sp, maxLines = 1)
+                                if (r.location == null) Text("Missing on this PC", color = Warn, fontSize = 12.sp)
+                            }
+                            TextButton({ openError = openReceived(engine, r) }, enabled = r.location != null) { Text("Open") }
+                            TextButton({ openError = showInFolder(r.location) }, enabled = r.location != null) { Text("Show in folder") }
+                        }
+                    }
+                    if (received.size > 8) TextButton({ showAllFiles = !showAllFiles }) { Text(if (showAllFiles) "Show fewer" else "Show all ${received.size}") }
+                    openError?.let { Text(it, color = Bad, fontSize = 13.sp) }
+                    if (cfg.storageMode == StorageMode.PRIVATE && received.isNotEmpty()) {
+                        Text("Private storage keeps files under random names. \"Open\" opens a temporary copy with the real name; \"Show in folder\" highlights the stored file.", color = Muted, fontSize = 12.sp)
                     }
                 }
             }

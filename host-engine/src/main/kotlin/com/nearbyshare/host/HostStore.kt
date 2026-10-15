@@ -123,6 +123,10 @@ class HostStore(file: File) : AutoCloseable {
 
     fun file(id: String): FileRec? = db.query("SELECT * FROM shared_files WHERE file_id = ? AND deleted_at IS NULL", id) { it.file() }.firstOrNull()
 
+    fun recentFiles(limit: Int): List<FileRec> = db.query(
+        "SELECT * FROM shared_files WHERE is_folder = 0 AND deleted_at IS NULL ORDER BY updated_at DESC LIMIT ?", limit,
+    ) { it.file() }
+
     fun list(owner: String, parent: String?): List<FileRec> = db.query(
         """SELECT * FROM shared_files WHERE owner_device_id = ? AND deleted_at IS NULL
            AND ((? IS NULL AND parent_file_id IS NULL) OR parent_file_id = ?)

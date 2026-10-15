@@ -296,4 +296,20 @@ class HostEngineTest {
         again.close()
         engine = HostEngine(File(tmp.root, "data"), scope) // for tearDown
     }
+
+    @Test
+    fun hostCanListReceivedFilesAndFindThemOnDisk() = test {
+        val (s, _) = guest("Ravi")
+        val folder = s.createFolder("Trips", null)
+        s.put("pic.jpg", "jpg".toByteArray(), folder.fileId)
+        val r = engine.receivedFiles().single()
+        assertEquals("Ravi", r.deviceName)
+        assertEquals("Trips", r.folder)
+        assertTrue(r.location!!.isFile)                       // private: random name on disk
+        assertFalse(r.location!!.name.contains("pic"))
+        val copy = engine.openableCopy(r.file)!!               // opens with the real name
+        assertEquals("pic.jpg", copy.name)
+        assertEquals("jpg", copy.readText())
+        s.close()
+    }
 }

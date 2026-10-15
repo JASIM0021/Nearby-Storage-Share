@@ -81,6 +81,7 @@ class HostEngine(dataDir: File, private val scope: CoroutineScope) : HostBackend
         store.inFlight().forEach { t -> t.stagingKey?.let { removeStaging(it) } }
         store.failAllInFlight(now())
         privateStore.clearStaging()
+        clearOpenCache()
         refresh()
     }
 
@@ -535,6 +536,44 @@ class HostEngine(dataDir: File, private val scope: CoroutineScope) : HostBackend
     fun setDeviceExpiry(deviceId: String, hoursFromNow: Long?) =
         updateAccess(deviceId) { it.copy(expiresAt = hoursFromNow?.let { h -> now() + h * 3_600_000L }) }
 
+
+    // ---- what the host can inspect --------------------------------------------------------------------------------------------
+
+    /** A received file as the host sees it: who sent it, where in their folders, and where it really is on this PC. */
+    class Received(val file: FileRec, val deviceName: String, val folder: String, val location: File?)
+
+    /** Every file guests have stored, newest first. [location] is null if the file is missing on disk. */
+    fun receivedFiles(limit: Int = 500): List<Received> {
+        val names = store.devices().associate { it.deviceId to it.displayName }
+        return store.recentFiles(limit).map { f ->
+            val parts = ArrayDeque<String>()
+            var cur = f.parentFileId
+            while (cur != null) {
+                val p = store.file(cur) ?: break
+                parts.addFirst(p.displayName)
+                cur = p.parentFileId
+            }
+            Received(f, names[f.ownerDeviceId] ?: "Unknown device", parts.joinToString("/"), physicalFile(f))
+        }
+    }
+
+    /** The stored file on disk, or null if it is gone. In private storage this has a random name. */
+    fun physicalFile(f: FileRec): File? {
+        val key = f.storageKey ?: return null
+        val file = if (VisibleStore.isKey(key)) visible.pathOf(key).toFile() else runCatching { privateStore.resolve(key) }.getOrNull()
+        return file?.takeIf { it.isFile }
+    }
+
+    /** A copy with the file's real name in a temporary folder, for opening files kept under random names. Replaced each time. */
+    fun openableCopy(f: FileRec): File? {
+        val src = physicalFile(f) ?: return null
+        if (VisibleStore.isKey(f.storageKey)) return src
+        val dir = File(dataRoot, "open_cache/${f.fileId}").apply { deleteRecursively(); mkdirs() }
+        return File(dir, VisibleStore.fsSafe(f.displayName)).also { src.copyTo(it, overwrite = true) }
+    }
+
+    /** Removes the temporary copies made for opening. */
+    fun clearOpenCache() { File(dataRoot, "open_cache").deleteRecursively() }
     fun fileCount(deviceId: String) = store.fileCount(deviceId)
     fun transfersFor(deviceId: String, limit: Int = 200) = store.transfersFor(deviceId, limit)
     fun auditFor(deviceId: String, limit: Int = 100) = store.auditFor(deviceId, limit)
