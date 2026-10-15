@@ -16,3 +16,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "NearbyStorageShare"
 include(":app")
+include(":lan-core")
+include(":host-engine")
+include(":desktop")

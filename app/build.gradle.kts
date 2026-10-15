@@ -15,8 +15,8 @@ android {
         applicationId = "com.nearbyshare"
         minSdk = 26
         targetSdk = 36
-        versionCode = 16
-        versionName = "1.4.0"
+        versionCode = 18
+        versionName = "1.6.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -85,6 +85,7 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
+    implementation(project(":lan-core"))
     implementation(libs.play.services.nearby)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.play.services)

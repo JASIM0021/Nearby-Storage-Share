@@ -122,18 +122,18 @@ fun SettingsScreen(host: HostViewModel, navigate: (String) -> Unit, notify: (Str
                 SectionCard {
                     CardHeader(Icons.Rounded.FolderOpen, ElectricBlue, "Storage location", "Where guest files are saved")
                     ModeRow(
-                        "Private (recommended)",
-                        "Hidden app storage. Other apps and file managers cannot see or change guest files.",
-                        c.storageMode == StorageMode.PRIVATE,
-                    ) { host.usePrivateStorage() }
-                    ModeRow(
-                        "Visible folder",
+                        "Visible folder (recommended)",
                         "Guest files appear in a folder you choose, with their real names, so you can browse them in your file manager.",
                         c.storageMode == StorageMode.VISIBLE,
                     ) {
                         val saved = c.visibleTreeUri
                         if (saved != null) host.useVisibleFolder(Uri.parse(saved)) { it?.let(notify) } else pickFolder.launch(null)
                     }
+                    ModeRow(
+                        "Hidden (advanced)",
+                        "Files stay in the app's private storage under random names. No file manager can see them, so their location cannot be opened.",
+                        c.storageMode == StorageMode.PRIVATE,
+                    ) { host.usePrivateStorage() }
                     if (c.storageMode == StorageMode.VISIBLE) {
                         Text(
                             "Folder: " + (folderName ?: "not available - choose it again"),

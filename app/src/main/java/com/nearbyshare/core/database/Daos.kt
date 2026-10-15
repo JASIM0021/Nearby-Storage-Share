@@ -46,6 +46,13 @@ interface DeviceDao {
     @Query("UPDATE devices SET secret_sealed = NULL WHERE device_id = :id")
     suspend fun clearSecret(id: String)
 
+    @Query("SELECT * FROM devices WHERE cert_fp = :fp LIMIT 1")
+    suspend fun findByCertFp(fp: String): Device?
+
+    /** Re-pairs an existing device over the network, keeping its files and permissions. */
+    @Query("UPDATE devices SET display_name = :name, cert_fp = :fp, trust_state = 'APPROVED', last_seen_at = :now WHERE device_id = :id")
+    suspend fun updateCertFp(id: String, name: String, fp: String, now: Long)
+
     @Query("UPDATE devices SET trust_state = :state WHERE device_id = :id")
     suspend fun setTrust(id: String, state: TrustState)
 
@@ -72,6 +79,9 @@ interface AccessDao {
 interface FileDao {
     @Query("SELECT * FROM shared_files WHERE file_id = :id AND deleted_at IS NULL")
     suspend fun get(id: String): SharedFile?
+
+    @Query("SELECT * FROM shared_files WHERE is_folder = 0 AND deleted_at IS NULL ORDER BY updated_at DESC LIMIT :n")
+    suspend fun recentFiles(n: Int): List<SharedFile>
 
     @Query(
         """SELECT * FROM shared_files
@@ -194,6 +204,13 @@ interface KnownHostDao {
 
     @Query("SELECT * FROM known_hosts ORDER BY last_connected_at DESC")
     suspend fun getAll(): List<KnownHost>
+
+    @Query("SELECT * FROM known_hosts WHERE cert_fp = :fp LIMIT 1")
+    suspend fun findByCertFp(fp: String): KnownHost?
+
+    /** Forget only the network pin; a Nearby pairing key for the same host stays. */
+    @Query("UPDATE known_hosts SET cert_fp = NULL WHERE cert_fp = :fp")
+    suspend fun clearCertFp(fp: String)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(host: KnownHost)

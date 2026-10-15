@@ -8,11 +8,19 @@ import androidx.room.RoomDatabase
         HostConfig::class, Device::class, DeviceAccess::class, SharedFile::class,
         Transfer::class, AuditEvent::class, KnownHost::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
     companion object {
+        /** v3: certificate fingerprints for the same-network (LAN) connection method. */
+        val MIGRATION_2_3 = object : androidx.room.migration.Migration(2, 3) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE devices ADD COLUMN cert_fp TEXT")
+                db.execSQL("ALTER TABLE known_hosts ADD COLUMN cert_fp TEXT")
+            }
+        }
+
         /** v2: host-selectable storage location. Existing installs keep all data and stay on private storage. */
         val MIGRATION_1_2 = object : androidx.room.migration.Migration(1, 2) {
             override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {

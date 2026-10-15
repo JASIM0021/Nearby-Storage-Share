@@ -64,6 +64,11 @@ class HostViewModel(app: Application) : AndroidViewModel(app) {
     val advertising = c.host.advertising
     val hostError = c.host.error
 
+    /** "ip:port" this phone can be reached on over the local network (for a PC, or connect-by-address). */
+    val addresses = c.host.addresses
+
+    fun refreshAddresses() = c.lanHost.refreshAddresses()
+
     private val _storage = MutableStateFlow(StorageSnapshot(0, 0))
     val storage: StateFlow<StorageSnapshot> = _storage.asStateFlow()
 
@@ -115,6 +120,63 @@ class HostViewModel(app: Application) : AndroidViewModel(app) {
     fun setAccessMode(mode: AccessMode) = updateConfig { it.copy(accessMode = mode) }
 
     fun setMaxGuests(n: Int) = updateConfig { it.copy(maxGuests = n.coerceIn(1, 8)) }
+
+    /** A file a guest sent, with who sent it and where it is. */
+    class ReceivedFile(val file: com.nearbyshare.core.database.SharedFile, val deviceName: String, val folder: String, val exists: Boolean, val inVisibleFolder: Boolean)
+
+    /** Everything guests have stored, newest first. */
+    suspend fun receivedFiles(limit: Int = 200): List<ReceivedFile> = withContext(Dispatchers.IO) {
+        val names = devices.value.associate { it.device.deviceId to it.device.displayName }
+        db.files().recentFiles(limit).map { f ->
+            val parts = ArrayDeque<String>()
+            var cur = f.parentFileId
+            while (cur != null) {
+                val p = db.files().get(cur) ?: break
+                parts.addFirst(p.displayName)
+                cur = p.parentFileId
+            }
+            val key = f.storageKey
+            val saf = com.nearbyshare.core.storage.VisibleFolderStore.isKey(key)
+            val exists = when {
+                key == null -> false
+                saf -> runCatching { c.visible.fromKey(key)?.exists() == true }.getOrDefault(false)
+                else -> runCatching { c.store.resolve(key).isFile }.getOrDefault(false)
+            }
+            ReceivedFile(f, names[f.ownerDeviceId] ?: "Unknown device", parts.joinToString("/"), exists, saf)
+        }
+    }
+
+    /** An intent that opens the file in whatever app handles its type (a named copy for hidden files), or null if it is gone. */
+    suspend fun openIntent(f: com.nearbyshare.core.database.SharedFile): android.content.Intent? = withContext(Dispatchers.IO) {
+        val key = f.storageKey ?: return@withContext null
+        val app = getApplication<Application>()
+        val uri: android.net.Uri = if (com.nearbyshare.core.storage.VisibleFolderStore.isKey(key)) {
+            android.net.Uri.parse(key.removePrefix(com.nearbyshare.core.storage.VisibleFolderStore.PREFIX))
+        } else {
+            val src = runCatching { c.store.resolve(key) }.getOrNull()?.takeIf { it.isFile } ?: return@withContext null
+            val dir = java.io.File(app.cacheDir, "previews").apply { mkdirs() }
+            val target = java.io.File(dir, "host_${f.fileId}_${f.displayName.replace(Regex("[^A-Za-z0-9._-]"), "_").takeLast(80)}")
+            if (!(target.isFile && target.length() == src.length())) src.copyTo(target, overwrite = true)
+            androidx.core.content.FileProvider.getUriForFile(app, "${app.packageName}.fileprovider", target)
+        }
+        val mime = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(f.displayName.substringAfterLast('.', "").lowercase()) ?: "*/*"
+        android.content.Intent(android.content.Intent.ACTION_VIEW).setDataAndType(uri, mime)
+            .addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            .also { it.clipData = android.content.ClipData.newRawUri(f.displayName, uri) }
+    }
+
+    /** An intent that opens the file manager at the folder holding the file. Only possible for files in a visible folder. */
+    fun folderIntent(f: com.nearbyshare.core.database.SharedFile): android.content.Intent? {
+        val key = f.storageKey?.takeIf { com.nearbyshare.core.storage.VisibleFolderStore.isKey(it) } ?: return null
+        val u = android.net.Uri.parse(key.removePrefix(com.nearbyshare.core.storage.VisibleFolderStore.PREFIX))
+        return runCatching {
+            val parent = android.provider.DocumentsContract.getDocumentId(u).substringBeforeLast('/', "")
+            if (parent.isEmpty()) return null
+            val dir = android.provider.DocumentsContract.buildDocumentUri(u.authority, parent)
+            android.content.Intent(android.content.Intent.ACTION_VIEW).setDataAndType(dir, android.provider.DocumentsContract.Document.MIME_TYPE_DIR)
+                .addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }.getOrNull()
+    }
 
     /** Display name of the chosen visible folder (e.g. "NearbyStorage"), or null when none/unavailable. */
     val visibleFolderName: StateFlow<String?> = config

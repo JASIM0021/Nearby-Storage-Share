@@ -49,6 +49,8 @@ data class Device(
     @ColumnInfo(name = "trust_state") val trustState: TrustState,
     @ColumnInfo(name = "first_seen_at") val firstSeenAt: Long,
     @ColumnInfo(name = "last_seen_at") val lastSeenAt: Long?,
+    /** SHA-256 of the TLS certificate this device pinned when it paired over the network (LAN). Null if it never did. */
+    @ColumnInfo(name = "cert_fp") val certFp: String? = null,
 )
 
 @Entity(
@@ -123,6 +125,9 @@ data class AuditEvent(
 data class KnownHost(
     @PrimaryKey @ColumnInfo(name = "host_id") val hostId: String,
     val name: String,
+    /** Nearby pairing key; empty for a host that was only ever paired over the network. */
     @ColumnInfo(name = "secret_sealed") val secretSealed: String,
     @ColumnInfo(name = "last_connected_at") val lastConnectedAt: Long,
+    /** SHA-256 of the host's TLS certificate, pinned at first network pairing. */
+    @ColumnInfo(name = "cert_fp") val certFp: String? = null,
 )
