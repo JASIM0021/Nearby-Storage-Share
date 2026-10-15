@@ -19,6 +19,7 @@ kotlin {
 
 dependencies {
     implementation(project(":lan-core"))
+    implementation(project(":host-engine"))
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
     implementation(compose.materialIconsExtended)
@@ -48,7 +49,7 @@ compose.desktop {
             vendor = "Todayintech Solution"
             copyright = "Copyright (c) 2026 Sk Jasimudin (Todayintech Solution)"
             // A trimmed runtime: TLS with elliptic-curve keys needs jdk.crypto.ec, which a minimal runtime would otherwise leave out.
-            modules("jdk.crypto.ec", "jdk.unsupported")
+            modules("jdk.crypto.ec", "jdk.unsupported", "java.sql")
             windows {
                 menuGroup = "Nearby Storage Share"
                 shortcut = true

@@ -36,6 +36,8 @@ kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 # Android's own org.json source, repackaged (Apache-2.0), used only off-device; Android itself uses the platform's copy
 android-json = { module = "com.vaadin.external.google:android-json", version = "0.0.20131108.vaadin1" }
+# Embedded SQLite for the PC host (Apache-2.0); bundles its native library
+sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version = "3.46.1.3" }
 bouncycastle-pkix = { module = "org.bouncycastle:bcpkix-jdk18on", version = "1.80" }
 kotlinx-coroutines-android ={ module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "coroutines" }
