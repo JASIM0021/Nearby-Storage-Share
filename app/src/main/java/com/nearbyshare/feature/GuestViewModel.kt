@@ -62,6 +62,20 @@ class GuestViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun startScan() = guest.startDiscovery()
+
+    /** Used when Bluetooth/location permissions were refused: devices on the same Wi-Fi can still be found. */
+    fun startNetworkScan() = guest.startNetworkDiscovery()
+
+    /** "192.168.1.20" or "192.168.1.20:45820". Returns an error message, or null when the connection was started. */
+    fun connectByAddress(text: String): String? {
+        val t = text.trim()
+        if (!Regex("^[A-Za-z0-9.\\-]+(:\\d{1,5})?$").matches(t)) return "Enter an address like 192.168.1.20 or 192.168.1.20:45820"
+        val host = t.substringBefore(':')
+        val port = t.substringAfter(':', "").ifEmpty { null }?.toInt() ?: com.nearbyshare.lan.LanConstants.DEFAULT_PORT
+        if (port !in 1..65535) return "The port must be between 1 and 65535"
+        guest.connectByAddress(host, port)
+        return null
+    }
     fun stopScan() = guest.stopDiscovery()
     fun connect(host: DiscoveredHost) = guest.connect(host)
     fun confirmPairing(accept: Boolean) = guest.confirmPairing(accept)

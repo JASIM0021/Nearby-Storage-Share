@@ -34,6 +34,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,9 +71,14 @@ fun NearbyScreen(guest: GuestViewModel, navigate: (String) -> Unit, notify: (Str
     val hosts by guest.hosts.collectAsStateWithLifecycle()
     val scanning by guest.discovering.collectAsStateWithLifecycle()
 
+    var showAddress by remember { mutableStateOf(false) }
+
     val startScan = rememberNearbyPermissionGate(
         onGranted = { guest.startScan() },
-        onDenied = { notify("Nearby permissions are needed to find devices") },
+        onDenied = {
+            guest.startNetworkScan()
+            notify("Bluetooth/location permission was refused, so only devices on the same Wi-Fi are shown")
+        },
     )
 
     LaunchedEffect(state) { if (state is GuestState.Connected) guest.stopScan() }
@@ -134,6 +145,8 @@ fun NearbyScreen(guest: GuestViewModel, navigate: (String) -> Unit, notify: (Str
                     }
                 }
 
+                OutlinedButton({ showAddress = true }, Modifier.fillMaxWidth().height(48.dp)) { Text("Connect by address (PC or other network)") }
+
                 // Radar with discovered hosts as blips
                 BoxWithConstraints(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     RadarView(scanning, hosts.size, Modifier.size(minOf(maxWidth, 320.dp)))
@@ -157,7 +170,10 @@ fun NearbyScreen(guest: GuestViewModel, navigate: (String) -> Unit, notify: (Str
                                 Avatar(h.name, size = 48.dp)
                                 Column(Modifier.weight(1f)) {
                                     Text(h.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, maxLines = 1)
-                                    Text("Storage host", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text(
+                                        if (h.isLan) "Wi-Fi network - ${h.address}" else "Nearby (Bluetooth / Wi-Fi Direct)",
+                                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
                                 }
                                 Button({ guest.connect(h) }) { Text("Connect") }
                             }
@@ -181,6 +197,40 @@ fun NearbyScreen(guest: GuestViewModel, navigate: (String) -> Unit, notify: (Str
             }
         }
     }
+
+    if (showAddress) {
+        ConnectByAddressDialog({ showAddress = false }) { guest.connectByAddress(it) }
+    }
+}
+
+/** For networks that hide devices from each other, or a PC: type the address the host shows. */
+@Composable
+private fun ConnectByAddressDialog(onDismiss: () -> Unit, onConnect: (String) -> String?) {
+    var text by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf<String?>(null) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Connect by address") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    "Type the address shown on the host (for example on its Home screen): 192.168.1.20:45820",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                OutlinedTextField(
+                    text, { text = it; error = null }, singleLine = true, label = { Text("Address") },
+                    isError = error != null, supportingText = { error?.let { Text(it) } },
+                )
+            }
+        },
+        confirmButton = {
+            TextButton({
+                val problem = onConnect(text)
+                if (problem == null) onDismiss() else error = problem
+            }, enabled = text.isNotBlank()) { Text("Connect") }
+        },
+        dismissButton = { TextButton(onDismiss) { Text("Cancel") } },
+    )
 }
 
 /** Concentric rings, a rotating sweep while scanning, a phone in the middle and one blip per discovered host. */

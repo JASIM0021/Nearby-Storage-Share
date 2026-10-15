@@ -47,7 +47,7 @@ class LanIdentityChangedException(val hostName: String) :
     IOException("The identity of $hostName has changed. If you did not expect this, someone may be impersonating it.")
 
 /** The host no longer knows this device (it was removed there); pair again. */
-class LanRepairRequiredException : IOException("The host no longer recognises this device. Pair again.")
+class LanRepairRequiredException(val fingerprint: String) : IOException("The host no longer recognises this device. Pair again.")
 
 /** The person on this device declined the pairing code. */
 class LanPairingDeclinedException : IOException("Pairing was cancelled")
@@ -94,7 +94,7 @@ class LanGuestClient(
 
             var reply = readControl(io)
             if (reply.type == MsgType.PAIR_CHALLENGE) {
-                if (known != null) throw LanRepairRequiredException() // we sent no commitment: pairing cannot proceed
+                if (known != null) throw LanRepairRequiredException(hostFingerprint) // we sent no commitment: pairing cannot proceed
                 val hostNonce = reply.body.getString("nonce")
                 val hostName = sanitizeDeviceName(reply.body.optString("hostName"))
                 // Reveal straight away so the host can show the same code at the same time.
@@ -261,7 +261,7 @@ class LanSession internal constructor(
         size: Long,
         sha256: String,
         input: () -> InputStream,
-        onAccepted: (transferId: String) -> Unit = {},
+        onAccepted: suspend (transferId: String) -> Unit = {},
         onProgress: (Long) -> Unit = {},
     ): String? {
         val begin = call(
@@ -310,7 +310,7 @@ class LanSession internal constructor(
     suspend fun download(
         fileId: String,
         out: OutputStream,
-        onMeta: (DownloadMeta) -> Unit = {},
+        onMeta: suspend (DownloadMeta) -> Unit = {},
         onProgress: (Long) -> Unit = {},
     ): DownloadMeta {
         val begin = call(MsgType.DOWNLOAD_BEGIN, JSONObject().put("fileId", fileId))

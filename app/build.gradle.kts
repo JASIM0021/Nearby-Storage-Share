@@ -15,8 +15,8 @@ android {
         applicationId = "com.nearbyshare"
         minSdk = 26
         targetSdk = 36
-        versionCode = 16
-        versionName = "1.4.0"
+        versionCode = 17
+        versionName = "1.5.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

@@ -79,10 +79,14 @@ fun HomeScreen(host: HostViewModel, guest: GuestViewModel, navigate: (String) ->
     val pending by host.pending.collectAsStateWithLifecycle()
     val advertising by host.advertising.collectAsStateWithLifecycle()
     val hostError by host.hostError.collectAsStateWithLifecycle()
+    val addresses by host.addresses.collectAsStateWithLifecycle()
     val folderName by host.visibleFolderName.collectAsStateWithLifecycle()
     val transfers by guest.transfers.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) { host.refreshStorage() }
+    LaunchedEffect(Unit) {
+        host.refreshStorage()
+        host.refreshAddresses()
+    }
 
     val askPermissions = rememberNearbyPermissionGate(
         onGranted = { host.setSharing(true) },
@@ -143,6 +147,10 @@ fun HomeScreen(host: HostViewModel, guest: GuestViewModel, navigate: (String) ->
                         enabled -> Pill("Starting...", Amber)
                     }
                     hostError?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium) }
+                    if (enabled && addresses.isNotEmpty()) {
+                        Text("Also reachable on your Wi-Fi at", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        addresses.forEach { Text(it, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold) }
+                    }
                 }
             },
             right = {

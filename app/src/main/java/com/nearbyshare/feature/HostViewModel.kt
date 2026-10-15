@@ -64,6 +64,11 @@ class HostViewModel(app: Application) : AndroidViewModel(app) {
     val advertising = c.host.advertising
     val hostError = c.host.error
 
+    /** "ip:port" this phone can be reached on over the local network (for a PC, or connect-by-address). */
+    val addresses = c.host.addresses
+
+    fun refreshAddresses() = c.lanHost.refreshAddresses()
+
     private val _storage = MutableStateFlow(StorageSnapshot(0, 0))
     val storage: StateFlow<StorageSnapshot> = _storage.asStateFlow()
 

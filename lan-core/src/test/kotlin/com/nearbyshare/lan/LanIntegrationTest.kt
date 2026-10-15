@@ -51,7 +51,7 @@ class LanIntegrationTest {
 
     @Before
     fun start() {
-        server = LanHostServer(hostIdentity, backend, hostId, { "Test Host" }, scope)
+        server = LanHostServer(lazyOf(hostIdentity), backend, hostId, { "Test Host" }, scope)
         port = server.start(0)
     }
 

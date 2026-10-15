@@ -6,7 +6,11 @@ import androidx.room.Room
 import com.nearbyshare.core.common.TransferProgress
 import com.nearbyshare.core.database.AppDatabase
 import com.nearbyshare.core.database.HostConfig
+import com.nearbyshare.core.network.GuestFacade
+import com.nearbyshare.core.network.HostCoordinator
 import com.nearbyshare.core.network.NearbyGuest
+import com.nearbyshare.core.network.lan.LanGuest
+import com.nearbyshare.core.network.lan.LanHost
 import com.nearbyshare.core.network.NearbyHost
 import com.nearbyshare.core.security.DeviceIdentity
 import com.nearbyshare.core.storage.PrivateFileStore
@@ -26,7 +30,7 @@ class AppContainer(context: Context) {
             kotlinx.coroutines.CoroutineExceptionHandler { _, e -> android.util.Log.e("AppScope", "uncaught in background task", e) },
     )
     val db: AppDatabase = Room.databaseBuilder(context, AppDatabase::class.java, "nearbyshare.db")
-        .addMigrations(AppDatabase.MIGRATION_1_2)
+        .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3)
         .build()
     val identity = DeviceIdentity(context)
     val scanner = StorageScanner(context)
@@ -34,9 +38,17 @@ class AppContainer(context: Context) {
     val progress = TransferProgress()
     val visible = VisibleFolderStore(context)
     val files = HostFileService(db, store, visible, scanner)
-    val host = NearbyHost(context, db, files, identity, progress, scope)
+    private val nearbyHost = NearbyHost(context, db, files, identity, progress, scope)
+    val lanHost = LanHost(context, db, files, identity, progress, scope)
+
+    /** Hosting over Nearby and over the local network, presented as one host. */
+    val host = HostCoordinator(nearbyHost, lanHost, scope)
     val notifier = TransferNotifier(context, progress)
-    val guest = NearbyGuest(context, db, identity, progress, notifier, scope)
+    private val nearbyGuest = NearbyGuest(context, db, identity, progress, notifier, scope)
+    private val lanGuest = LanGuest(context, db, identity, progress, notifier, scope)
+
+    /** Connecting to hosts found by either method, used through one set of functions. */
+    val guest = GuestFacade(nearbyGuest, lanGuest, scope)
 
     init {
         // The drive in the Files app lists hosts and their connection state: tell it whenever the connection changes.

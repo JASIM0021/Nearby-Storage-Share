@@ -60,7 +60,10 @@ sealed interface GuestState {
     data class Failed(val message: String) : GuestState
 }
 
-data class DiscoveredHost(val endpointId: String, val hostId: String, val name: String)
+/** A host found by either method. [address] is set only for hosts found on the local network. */
+data class DiscoveredHost(val endpointId: String, val hostId: String, val name: String, val address: String? = null, val port: Int = 0) {
+    val isLan: Boolean get() = address != null
+}
 
 class RemoteException(val code: String, message: String) : IOException(message)
 
@@ -78,7 +81,7 @@ class NearbyGuest(
     private val progress: TransferProgress,
     private val notifier: com.nearbyshare.service.TransferNotifier,
     private val scope: CoroutineScope,
-) {
+) : GuestTransport {
     private val appContext = context.applicationContext
     private val client = Nearby.getConnectionsClient(appContext)
 
@@ -363,31 +366,31 @@ class NearbyGuest(
 
     // ---- remote file API ---------------------------------------------------------------------------------------------------
 
-    suspend fun storageInfo(): StorageInfo = StorageInfo.fromJson(call(MsgType.STORAGE_INFO))
+    override suspend fun storageInfo(): StorageInfo = StorageInfo.fromJson(call(MsgType.STORAGE_INFO))
 
-    suspend fun list(parentId: String?): List<RemoteFile> =
+    override suspend fun list(parentId: String?): List<RemoteFile> =
         RemoteFile.listFromJson(call(MsgType.LIST_DIRECTORY, JSONObject().put("parentId", parentId ?: "")).getJSONArray("items"))
 
-    suspend fun createFolder(name: String, parentId: String?): RemoteFile =
+    override suspend fun createFolder(name: String, parentId: String?): RemoteFile =
         RemoteFile.fromJson(call(MsgType.MKDIR, JSONObject().put("name", name).put("parentId", parentId ?: "")))
 
     /** Details of one item (including its parent folder). */
-    suspend fun stat(fileId: String): RemoteFile = RemoteFile.fromJson(call(MsgType.STAT, JSONObject().put("fileId", fileId)))
+    override suspend fun stat(fileId: String): RemoteFile = RemoteFile.fromJson(call(MsgType.STAT, JSONObject().put("fileId", fileId)))
 
-    suspend fun rename(fileId: String, newName: String): RemoteFile =
+    override suspend fun rename(fileId: String, newName: String): RemoteFile =
         RemoteFile.fromJson(call(MsgType.RENAME, JSONObject().put("fileId", fileId).put("name", newName)))
 
-    suspend fun search(query: String): List<RemoteFile> =
+    override suspend fun search(query: String): List<RemoteFile> =
         RemoteFile.listFromJson(call(MsgType.SEARCH, JSONObject().put("q", query)).getJSONArray("items"))
 
     /** Id of the host this phone is connected and authenticated to right now, or null. */
     val connectedHostId: String? get() = (_state.value as? GuestState.Connected)?.hostId
 
-    suspend fun delete(fileId: String) {
+    override suspend fun delete(fileId: String) {
         call(MsgType.DELETE_FILE, JSONObject().put("fileId", fileId))
     }
 
-    suspend fun cancelTransfer(transferId: String) {
+    override suspend fun cancelTransfer(transferId: String) {
         uploadPayloads.entries.firstOrNull { it.value == transferId }?.let { client.cancelPayload(it.key) }
         downloadTransfers.entries.firstOrNull { it.value == transferId }?.let { client.cancelPayload(it.key) }
         runCatching { call(MsgType.TRANSFER_CANCEL, JSONObject().put("transferId", transferId)) }
@@ -399,7 +402,7 @@ class NearbyGuest(
         } ?: "upload-${System.currentTimeMillis()}"
 
     /** Uploads [uri] to the host, showing a 0-100% notification (and keeping the process alive) until it finishes. */
-    suspend fun upload(uri: Uri, parentId: String?, name: String? = null): String? {
+    override suspend fun upload(uri: Uri, parentId: String?, name: String?): String? {
         val local = "pending-${UUID.randomUUID()}"
         var key = local
         var ok = false
@@ -492,7 +495,7 @@ class NearbyGuest(
         newFileId
     }
 
-    suspend fun download(file: RemoteFile, dest: Uri): Unit = withContext(Dispatchers.IO) {
+    override suspend fun download(file: RemoteFile, dest: Uri): Unit = withContext(Dispatchers.IO) {
         val host = currentHost ?: throw IOException("Not connected")
         val resolver = appContext.contentResolver
         val begin = call(MsgType.DOWNLOAD_BEGIN, JSONObject().put("fileId", file.fileId))

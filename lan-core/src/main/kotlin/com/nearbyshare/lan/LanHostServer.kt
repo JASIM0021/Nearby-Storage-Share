@@ -71,12 +71,14 @@ internal class ChannelInputStream(private val channel: Channel<ByteArray>) : Inp
  * authenticates known ones by their pinned certificate, and serves requests through a [HostBackend].
  */
 class LanHostServer(
-    private val identity: LanIdentity,
+    /** Lazy so the key is only created (or loaded) when hosting actually starts. */
+    private val identityProvider: Lazy<LanIdentity>,
     private val backend: HostBackend,
     private val hostId: String,
     private val hostName: () -> String,
     private val scope: CoroutineScope,
 ) {
+    private val identity: LanIdentity get() = identityProvider.value
     private var server: SSLServerSocket? = null
     private var acceptJob: Job? = null
     private val conns = ConcurrentHashMap<String, Conn>()
