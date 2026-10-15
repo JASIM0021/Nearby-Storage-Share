@@ -21,13 +21,13 @@
 
 <main>
 <h1>Privacy Policy</h1>
-<p class="meta">Last updated: October 15, 2026 &middot; Applies to the Android app <strong>Nearby Storage Share</strong> (package <code>com.nearbyshare</code>)</p>
+<p class="meta">Last updated: October 16, 2026 &middot; Applies to the Android app <strong>Nearby Storage Share</strong> (package <code>com.nearbyshare</code>)</p>
 
 <h2 id="summary">1. The short version</h2>
 <div class="card">
 <ul>
   <li><strong>No accounts, no servers, no ads, no analytics.</strong> We do not run any server that receives your files or personal data.</li>
-  <li>Files and settings stay <strong>on the phones that use the app</strong>. Phones talk to each other directly over Bluetooth / Wi-Fi when they are near each other.</li>
+  <li>Files and settings stay <strong>on the phones and PCs that use the app</strong>. Devices talk to each other directly - over Bluetooth / Wi-Fi when they are near each other, or over the same Wi-Fi or hotspot network - never through a server of ours.</li>
   <li>When you <strong>host</strong>, other people's files are stored on <strong>your</strong> phone, and you (the owner of that phone) can see and delete them. When you <strong>upload to someone else's phone</strong>, that person can see and delete your files.</li>
   <li>We do not sell your data, and we do not share it with advertisers or data brokers.</li>
   <li>You can erase everything by deleting the app's data or uninstalling it.</li>
@@ -41,8 +41,10 @@
 <table>
 <thead><tr><th>Information</th><th>Where it is kept</th><th>Why</th><th>Leaves the phone?</th></tr></thead>
 <tbody>
-<tr><td>Device name (defaults to your phone's model; you can change it) and a random device ID created by the app</td><td>On your phone</td><td>So hosts and guests can recognize each other</td><td>Yes - sent to nearby devices you connect to; a host's name and ID are also visible to nearby devices that are scanning while sharing is on</td></tr>
+<tr><td>Device name (defaults to your phone's model; you can change it) and a random device ID created by the app</td><td>On your phone</td><td>So hosts and guests can recognize each other</td><td>Yes - sent to the devices you connect to. While sharing is on, a host's name and ID are also visible to nearby devices that are scanning, and are broadcast on the local Wi-Fi/hotspot network so other devices there can find it</td></tr>
 <tr><td>Pairing keys for hosts and guests you approved</td><td>On your phone, encrypted with a key held in the Android Keystore</td><td>To prove it is the same device on reconnect, without asking you to pair again</td><td>Only during pairing, over the encrypted connection</td></tr>
+<tr><td>Fingerprints of the TLS certificates of devices you paired with over a Wi-Fi/hotspot network</td><td>On your phone or PC (a host keeps its guests' fingerprints; a guest keeps its hosts')</td><td>To recognise a device when it reconnects and to detect impersonation</td><td>Only during pairing, to the device you are pairing with</td></tr>
+<tr><td>Windows app: this PC's name, a random device ID, its TLS key and certificate, and the list of paired hosts with their last network address</td><td>In the folder <code>%APPDATA%\NearbyStorageShare</code> on your PC</td><td>To identify this PC, reconnect without a code and show your paired hosts</td><td>Only the name, ID and certificate are shown to a host you connect to</td></tr>
 <tr><td>Files you share or upload, and folders you create</td><td>On the <strong>host's</strong> phone: in the app's private storage, or in a folder the host chose</td><td>The purpose of the app</td><td>Only to the host or guest you are connected to</td></tr>
 <tr><td>File details: name, size, folder, SHA-256 checksum, dates</td><td>On the host's phone (and the guest's transfer list)</td><td>To list files, check them for corruption and enforce limits</td><td>Only to the connected device</td></tr>
 <tr><td>Permissions and limits for each approved device (read, upload, overwrite, delete, storage limit, expiry)</td><td>On the host's phone</td><td>To enforce what each guest is allowed to do</td><td>The guest is told what it may do</td></tr>
@@ -66,6 +68,7 @@
 <thead><tr><th>Permission</th><th>Reason</th></tr></thead>
 <tbody>
 <tr><td>Bluetooth (scan, advertise, connect), Nearby Wi-Fi devices, Wi-Fi and network state / change</td><td>To find and connect to nearby phones directly.</td></tr>
+<tr><td>Internet / network access and Wi-Fi multicast</td><td>To connect directly to phones and PCs on the <strong>same local network</strong> and to find them. The app does not contact any server of ours, and it sends your files only to the device you connect to.</td></tr>
 <tr><td>Location (approximate and precise)</td><td>Android and Google's Nearby technology require this permission to scan for nearby devices on many versions. The app does <strong>not</strong> read, store or send your location.</td></tr>
 <tr><td>Notifications</td><td>To show hosting status, connection status and transfer progress (0-100%). Optional: transfers work without it.</td></tr>
 <tr><td>Foreground services</td><td>To keep hosting, an active connection or a transfer running while the app is not on screen. You always see a notification and can stop it.</td></tr>
@@ -75,7 +78,7 @@
 
 <h2 id="security">6. How data is protected</h2>
 <ul>
-  <li>Devices connect through <strong>Google's Nearby Connections</strong>, which uses an encrypted connection. When two phones pair for the first time, both show the same code that you compare before approving.</li>
+  <li>Devices connect either through <strong>Google's Nearby Connections</strong> (encrypted) or over the local network using <strong>TLS</strong> (versions 1.2/1.3) with a certificate on each device. When two devices pair for the first time, both show the same 6-digit code that you compare before approving; after that each device recognises the other by its pinned certificate. The code is derived so that an attacker in the middle cannot make the two screens agree.</li>
   <li>After pairing, each device proves its identity with a shared secret on every reconnect. The secret is stored encrypted with the Android Keystore.</li>
   <li>The host checks every request against what that guest is allowed to do, so a modified app cannot do more than the host permits. Files are checked with a SHA-256 checksum, and incomplete uploads never appear as finished files.</li>
   <li>Backups are switched off for the app's data so files and keys are not copied to cloud backups or transferred to a new phone automatically.</li>
@@ -95,6 +98,7 @@
 <h2 id="retention">9. Keeping and deleting data</h2>
 <ul>
   <li>Data stays on a phone until you delete it. In the app you can delete files (where permitted), revoke or block a device, clear finished transfers, or stop sharing at any time.</li>
+  <li>On a PC, delete the folder <code>%APPDATA%\NearbyStorageShare</code> (and uninstall the app) to remove everything the Windows app holds.</li>
   <li>To remove everything the app holds on a phone, use <em>Android Settings &rarr; Apps &rarr; Nearby Storage Share &rarr; Storage &rarr; Clear data</em>, or uninstall the app.</li>
   <li>Files you uploaded to <em>another person's</em> phone are on their device; ask them to delete them, or delete them yourself if the host allowed deleting.</li>
   <li>If you chose a visible folder, files in it are ordinary files and stay there until deleted, even if you uninstall the app.</li>
