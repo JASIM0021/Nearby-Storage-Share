@@ -12,6 +12,7 @@ import androidx.compose.ui.window.Notification
 import androidx.compose.ui.window.Tray
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.isTraySupported
 import androidx.compose.ui.window.rememberTrayState
 import androidx.compose.ui.window.rememberWindowState
 import kotlinx.coroutines.CoroutineScope
@@ -20,9 +21,11 @@ import kotlinx.coroutines.SupervisorJob
 
 fun main(args: Array<String>) = application {
     val app = remember { DesktopApp(CoroutineScope(SupervisorJob() + Dispatchers.Default)) }
-    // "--tray" = started by Windows at sign-in: stay out of the way until the user opens it
+    // "--tray" = started at login: stay out of the way until the user opens it
     var visible by remember { mutableStateOf("--tray" !in args) }
     val trayState = rememberTrayState()
+    val trayOk = isTraySupported
+    val windowState = rememberWindowState(width = 1080.dp, height = 760.dp)
     val pending by app.host.engine.pending.collectAsState()
 
     // a request to connect must not go unnoticed while the window is hidden in the tray
@@ -37,7 +40,7 @@ fun main(args: Array<String>) = application {
         exitApplication()
     }
 
-    Tray(
+    if (trayOk) Tray(
         icon = painterResource("icon.png"),
         state = trayState,
         tooltip = if (app.host.running) "Nearby Storage Share: sharing is on" else "Nearby Storage Share",
@@ -52,16 +55,19 @@ fun main(args: Array<String>) = application {
         visible = visible,
         onCloseRequest = {
             // while sharing, closing the window keeps the host running in the tray
-            if (app.host.running) {
+            if (app.host.running && trayOk) {
                 visible = false
                 trayState.sendNotification(Notification("Still sharing", "Nearby Storage Share keeps running in the tray. Use the tray icon to open or quit.", Notification.Type.Info))
+            } else if (app.host.running) {
+                // no tray on this desktop: keep sharing, just minimise
+                windowState.isMinimized = true
             } else {
                 quit()
             }
         },
         title = "Nearby Storage Share",
         icon = painterResource("icon.png"),
-        state = rememberWindowState(width = 1080.dp, height = 760.dp),
+        state = windowState,
     ) {
         NearbyTheme { AppRoot(app) }
     }

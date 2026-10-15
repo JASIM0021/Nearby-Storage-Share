@@ -188,7 +188,7 @@ private fun HostsScreen(app: DesktopApp) {
                 Tile(Icons.Rounded.WifiTethering, Blue, 56)
                 Column {
                     Text("Nearby Storage Share", fontSize = 28.sp, fontWeight = FontWeight.Bold)
-                    Text("This PC: ${app.device.name}", color = Muted)
+                    Text("This computer: ${app.device.name}", color = Muted)
                 }
             }
 
@@ -362,7 +362,7 @@ private fun BrowserScreen(app: DesktopApp) {
                         FileRow(
                             f, perms?.read == true, perms?.delete == true, perms?.write == true,
                             onOpenFolder = { app.openFolder(f) },
-                            onOpen = { app.openInCache(f) { file -> runCatching { Desktop.getDesktop().open(file) }.onFailure { app.message = "No app on this PC can open ${f.name}. Use Save instead." } } },
+                            onOpen = { app.openInCache(f) { file -> Platform.open(file)?.let { app.message = "$it Use Save instead." } } },
                             onSave = {
                                 val dlg = FileDialog(null as Frame?, "Save ${f.name}", FileDialog.SAVE).apply { file = f.name; isVisible = true }
                                 if (dlg.file != null) app.download(f, File(dlg.directory, dlg.file))
@@ -417,7 +417,7 @@ private fun FileRow(
         }
         if (!f.isFolder && canRead) {
             IconButton(onOpen) { Icon(Icons.Rounded.OpenInNew, "Open") }
-            IconButton(onSave) { Icon(Icons.Rounded.Download, "Save to PC") }
+            IconButton(onSave) { Icon(Icons.Rounded.Download, "Save to this computer") }
         }
         if (canWrite) IconButton(onRename) { Icon(Icons.Rounded.DriveFileRenameOutline, "Rename") }
         if (canDelete) IconButton(onDelete) { Icon(Icons.Rounded.Delete, "Delete") }

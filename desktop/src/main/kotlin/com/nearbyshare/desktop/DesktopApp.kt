@@ -56,7 +56,7 @@ class TransferItem(val name: String, val upload: Boolean) {
 }
 
 /**
- * All state and behaviour of the Windows app, kept apart from the screens so it can be tested without a window.
+ * All state and behaviour of the desktop app (Windows, macOS, Linux), kept apart from the screens so it can be tested without a window.
  * [dataDir] holds this PC's identity (key and certificate), device name and the hosts it has paired with.
  */
 class DesktopApp(private val scope: CoroutineScope, val dataDir: File = defaultDataDir()) {
@@ -342,6 +342,6 @@ class DesktopApp(private val scope: CoroutineScope, val dataDir: File = defaultD
     fun clearFinishedTransfers() = transfers.removeAll { it.finished }
 
     companion object {
-        fun defaultDataDir(): File = File(System.getenv("APPDATA") ?: System.getProperty("user.home"), "NearbyStorageShare")
+        fun defaultDataDir(): File = Platform.dataDir()
     }
 }

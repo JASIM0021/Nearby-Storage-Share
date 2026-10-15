@@ -1,4 +1,4 @@
-# Nearby Storage Share for Windows
+# Nearby Storage Share for Windows, macOS and Linux
 
 A desktop app (Compose Multiplatform for Desktop, Kotlin/JVM) that connects to a host phone **over the local network** and lets you
 browse, upload, download, open, rename and delete the files you have stored there. It uses the same `lan-core` module as the Android app,
@@ -55,3 +55,22 @@ The distributable is written to `desktop/build/compose/binaries/main/app/NearbyS
 WiX Toolset installed. Screens rendered by the tests land in `desktop/build/screenshots/`.
 
 To try the app without a phone: `.\gradlew :lan-core:demoHost` starts a stand-in host (in-memory files) that the app will find.
+
+## macOS and Linux
+
+The same app (same code, same features as on Windows) is built for macOS and Linux. An installer has to be built on its own
+operating system, so GitHub Actions does it: **Actions → Desktop apps → Run workflow**, then download the artifacts
+(`.msi`/`.exe`, `.dmg`, `.deb`/`.rpm`). Or build locally on that system with
+`./gradlew :desktop:packageDmg` (macOS) or `./gradlew :desktop:packageDeb` / `packageRpm` (Linux).
+
+| | Windows | macOS | Linux |
+|---|---|---|---|
+| Data folder | `%APPDATA%\NearbyStorageShare` | `~/Library/Application Support/NearbyStorageShare` | `~/.config/NearbyStorageShare` |
+| Start at login | registry Run key | LaunchAgent | `~/.config/autostart` entry |
+| Keep awake while sharing | Windows power request | `caffeinate` | `systemd-inhibit` |
+| Show in folder | File Explorer, file selected | Finder, file selected | opens the folder (`xdg-open`) |
+| Firewall | allow on Private networks | allow incoming connections | allow TCP 45820 and UDP 45821 |
+
+Notes: the installers are not code-signed, so macOS (Gatekeeper: right-click → Open) and Windows (SmartScreen) warn the first time.
+macOS asks for **Local Network** permission; allow it. On Linux desktops without a tray (default GNOME) closing the window
+while sharing minimises it instead, so sharing keeps running. The macOS and Linux builds have not been run by me on those systems.

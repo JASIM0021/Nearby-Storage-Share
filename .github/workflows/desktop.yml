@@ -1,0 +1,40 @@
+name: Desktop apps
+
+# Builds the Windows, macOS and Linux installers. Each one has to be built on its own operating system.
+on:
+  workflow_dispatch:
+  push:
+    tags: ['desktop-v*']
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            task: packageMsi packageExe
+            glob: desktop/build/compose/binaries/main*/**/*.{msi,exe}
+          - os: macos-latest
+            task: packageDmg
+            glob: desktop/build/compose/binaries/main*/**/*.dmg
+          - os: ubuntu-latest
+            task: packageDeb packageRpm
+            glob: desktop/build/compose/binaries/main*/**/*.{deb,rpm}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Tests
+        run: ./gradlew :lan-core:test :host-engine:test :desktop:test --console=plain
+        shell: bash
+      - name: Package
+        run: ./gradlew :desktop:${{ matrix.task }} --console=plain
+        shell: bash
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nearby-storage-share-${{ matrix.os }}
+          path: ${{ matrix.glob }}

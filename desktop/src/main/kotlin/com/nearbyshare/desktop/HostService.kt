@@ -42,7 +42,7 @@ class HostService(private val scope: CoroutineScope, dataDir: File, private val 
         // A first run shares a normal folder you can open in File Explorer. Hidden storage is an advanced option.
         if (engine.config.value.visibleDir == null && engine.devices.value.isEmpty()) {
             runCatching {
-                val dir = File(System.getProperty("user.home"), "Documents/Nearby Storage Share").apply { mkdirs() }
+                val dir = Platform.defaultShareFolder().apply { mkdirs() }
                 engine.useVisibleFolder(dir.absolutePath)
             }
         }
@@ -92,36 +92,17 @@ class HostService(private val scope: CoroutineScope, dataDir: File, private val 
             .map { it.hostAddress }
     }.getOrDefault(emptyList())
 
-    /** While sharing, a sleeping PC would drop every guest. A tiny helper process holds the "stay awake" request and ends with us. */
+    /** While sharing, a sleeping computer would drop every guest. A tiny helper process holds the "stay awake" request and ends with us. */
     private fun keepAwake(on: Boolean) {
         awake?.destroy()
         awake = null
-        if (!on || !System.getProperty("os.name").orEmpty().startsWith("Windows")) return
-        val script = "Add-Type -Name P -Namespace W -MemberDefinition '[DllImport(\"kernel32.dll\")] public static extern uint SetThreadExecutionState(uint f);';" +
-            "while (\$true) { [W.P]::SetThreadExecutionState(0x80000001) | Out-Null; Start-Sleep -Seconds 30 }"
-        awake = runCatching {
-            ProcessBuilder("powershell", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", script).redirectErrorStream(true).start()
-        }.getOrNull()
+        val cmd = Platform.keepAwakeCommand() ?: return
+        if (!on) return
+        awake = runCatching { ProcessBuilder(cmd).redirectErrorStream(true).start() }.getOrNull()
     }
 
     companion object {
-        private const val RUN_KEY = """HKCU\Software\Microsoft\Windows\CurrentVersion\Run"""
-        private const val RUN_NAME = "NearbyStorageShare"
-
-        fun autostartEnabled(): Boolean = runCatching {
-            ProcessBuilder("reg", "query", RUN_KEY, "/v", RUN_NAME).redirectErrorStream(true).start().waitFor() == 0
-        }.getOrDefault(false)
-
-        /** Starts the app (minimised to the tray) when the user signs in to Windows. */
-        fun setAutostart(on: Boolean) {
-            runCatching {
-                if (on) {
-                    val exe = ProcessHandle.current().info().command().orElse(null) ?: return
-                    ProcessBuilder("reg", "add", RUN_KEY, "/v", RUN_NAME, "/t", "REG_SZ", "/d", "\"$exe\" --tray", "/f").start().waitFor()
-                } else {
-                    ProcessBuilder("reg", "delete", RUN_KEY, "/v", RUN_NAME, "/f").start().waitFor()
-                }
-            }
-        }
+        fun autostartEnabled() = Platform.autostartEnabled()
+        fun setAutostart(on: Boolean) = Platform.setAutostart(on)
     }
 }

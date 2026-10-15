@@ -42,10 +42,10 @@ compose.desktop {
     application {
         mainClass = "com.nearbyshare.desktop.MainKt"
         nativeDistributions {
-            targetFormats(TargetFormat.Msi, TargetFormat.Exe)
+            targetFormats(TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Dmg, TargetFormat.Deb, TargetFormat.Rpm)
             packageName = "NearbyStorageShare"
             packageVersion = "1.1.0"
-            description = "Share and use storage on nearby phones and PCs"
+            description = "Share and use storage on nearby phones and computers"
             vendor = "Todayintech Solution"
             copyright = "Copyright (c) 2026 Sk Jasimudin (Todayintech Solution)"
             // A trimmed runtime: TLS with elliptic-curve keys needs jdk.crypto.ec, which a minimal runtime would otherwise leave out.
@@ -54,6 +54,24 @@ compose.desktop {
                 menuGroup = "Nearby Storage Share"
                 shortcut = true
                 iconFile.set(project.file("icons/app.ico"))
+            }
+            macOS {
+                bundleID = "in.todayintech.nearbystorageshare"
+                dockName = "Nearby Storage Share"
+                iconFile.set(project.file("icons/app.icns"))
+                appCategory = "public.app-category.utilities"
+                // macOS asks the user before an app talks to other devices on the local network; this is the text it shows.
+                infoPlist {
+                    extraKeysRawXml = "<key>NSLocalNetworkUsageDescription</key><string>Nearby Storage Share finds and talks to your other devices on this network to share files.</string>"
+                }
+            }
+            linux {
+                packageName = "nearby-storage-share"
+                menuGroup = "Network"
+                shortcut = true
+                iconFile.set(project.file("icons/app.png"))
+                debMaintainer = "contact@todayintech.in"
+                appCategory = "Network"
             }
         }
     }

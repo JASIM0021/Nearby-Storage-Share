@@ -122,7 +122,7 @@ class LanHostServer(
         acceptJob?.cancel()
         runCatching { server?.close() }
         server = null
-        conns.values.toList().forEach { it.close() }
+        ArrayList(conns.values).forEach { it.close() }
         publish()
     }
 

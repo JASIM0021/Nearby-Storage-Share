@@ -92,17 +92,12 @@ private fun chooseFolder(): String? {
 
 private fun whenText(ms: Long?): String = if (ms == null) "never" else DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(ms))
 
-private fun openReceived(engine: HostEngine, r: HostEngine.Received): String? = runCatching {
-    val f = engine.openableCopy(r.file) ?: return "That file is missing on this PC."
-    java.awt.Desktop.getDesktop().open(f)
-    null
-}.getOrElse { "No app on this PC can open ${r.file.displayName}. Use Show in folder." }
-
-/** Opens File Explorer with the file selected. */
-private fun showInFolder(f: java.io.File?): String? {
-    if (f == null) return "That file is missing on this PC."
-    return runCatching { ProcessBuilder("explorer.exe", "/select,", f.absolutePath).start(); null }.getOrElse { "Could not open File Explorer." }
+private fun openReceived(engine: HostEngine, r: HostEngine.Received): String? {
+    val f = engine.openableCopy(r.file) ?: return "That file is missing on this computer."
+    return Platform.open(f)?.let { "$it Use Show in folder." }
 }
+
+private fun showInFolder(f: java.io.File?): String? = Platform.reveal(f)
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -138,7 +133,7 @@ fun HostScreen(app: DesktopApp) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                         Tile(Icons.Rounded.Dns, if (host.running) Mint else Blue, 52)
                         Column(Modifier.weight(1f)) {
-                            Text("Share this PC's storage", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                            Text("Share this computer's storage", fontSize = 22.sp, fontWeight = FontWeight.Bold)
                             Text(
                                 if (host.running) "Sharing is on · ${live.count { it.authenticated }} connected" else "Sharing is off. Nobody can connect.",
                                 color = if (host.running) Mint else Muted,
@@ -148,12 +143,12 @@ fun HostScreen(app: DesktopApp) {
                     }
                     host.error?.let { Text(it, color = Bad) }
                     if (host.running) {
-                        Text("Other devices find this PC automatically. If it does not show up, connect by address:", color = Muted, fontSize = 13.sp)
+                        Text("Other devices find this computer automatically. If it does not show up, connect by address:", color = Muted, fontSize = 13.sp)
                         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             host.addresses.forEach { Chip(it, Blue) }
                             if (host.addresses.isEmpty()) Text("No network connection found.", color = Warn)
                         }
-                        Text("The first time, Windows asks to allow the app through the firewall: choose Private networks.", color = Muted, fontSize = 12.sp)
+                        Platform.firewallNote?.let { Text(it, color = Muted, fontSize = 12.sp) }
                     }
                     val share = cfg.quotaBytes
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -161,7 +156,7 @@ fun HostScreen(app: DesktopApp) {
                         Text("${formatBytes((share - used).coerceAtLeast(0))} free", color = Muted)
                     }
                     LinearProgressIndicator({ if (share <= 0) 0f else (used.toFloat() / share).coerceIn(0f, 1f) }, Modifier.fillMaxWidth())
-                    if (disk.first > 0) Text("This PC's disk: ${formatBytes(disk.second)} free of ${formatBytes(disk.first)}", color = Muted, fontSize = 12.sp)
+                    if (disk.first > 0) Text("This computer's disk: ${formatBytes(disk.second)} free of ${formatBytes(disk.first)}", color = Muted, fontSize = 12.sp)
                 }
             }
 
@@ -169,7 +164,7 @@ fun HostScreen(app: DesktopApp) {
             Panel(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Heading("Storage to share")
-                    Text("Guests together can store at most this much. ${formatBytes(cfg.safetyReserveBytes)} always stays free for this PC.", color = Muted, fontSize = 13.sp)
+                    Text("Guests together can store at most this much. ${formatBytes(cfg.safetyReserveBytes)} always stays free for this computer.", color = Muted, fontSize = 13.sp)
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(5L, 10L, 20L, 50L).forEach { g -> Pick("$g GB", cfg.quotaBytes == g * GIB) { quotaError = engine.setQuota(g * GIB) } }
                     }
@@ -208,7 +203,7 @@ fun HostScreen(app: DesktopApp) {
                             OutlinedButton({ chooseFolder()?.let { folderError = engine.useVisibleFolder(it) } }) { Text("Change") }
                         }
                         Text(
-                            "Each guest gets its own subfolder with real file names, so you can open them in File Explorer. Anyone who can open this folder can also change those files. Files already saved stay where they are when you switch.",
+                            "Each guest gets its own subfolder with real file names, so you can open them in ${Platform.fileManager}. Anyone who can open this folder can also change those files. Files already saved stay where they are when you switch.",
                             color = Muted, fontSize = 13.sp,
                         )
                     }
@@ -290,7 +285,7 @@ fun HostScreen(app: DesktopApp) {
                                 Text(r.file.displayName, fontWeight = FontWeight.SemiBold, maxLines = 1)
                                 val where = if (r.folder.isEmpty()) "" else " · in ${r.folder}"
                                 Text("${r.deviceName} · ${formatBytes(r.file.sizeBytes)} · ${whenText(r.file.updatedAt)}$where", color = Muted, fontSize = 12.sp, maxLines = 1)
-                                if (r.location == null) Text("Missing on this PC", color = Warn, fontSize = 12.sp)
+                                if (r.location == null) Text("Missing on this computer", color = Warn, fontSize = 12.sp)
                             }
                             TextButton({ openError = openReceived(engine, r) }, enabled = r.location != null) { Text("Open") }
                             TextButton({ openError = showInFolder(r.location) }, enabled = r.location != null) { Text("Show in folder") }
@@ -316,19 +311,19 @@ fun HostScreen(app: DesktopApp) {
                 }
             }
 
-            // --- this PC
+            // --- this computer
             Panel(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Heading("This PC")
+                    Heading("This computer")
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) { Text("Name shown to other devices"); Text(deviceName, color = Muted, fontSize = 13.sp) }
                         OutlinedButton({ renaming = true }) { Text("Rename") }
                     }
-                    ToggleRow("Start with Windows", "Opens in the tray when you sign in. Sharing still has to be switched on.", autostart) {
+                    ToggleRow(Platform.startAtLoginLabel, "Opens in the tray when you log in. Sharing still has to be switched on.", autostart) {
                         HostService.setAutostart(it)
                         autostart = HostService.autostartEnabled()
                     }
-                    Text("While sharing, Windows is kept awake so guests are not dropped. Closing the window keeps sharing in the tray.", color = Muted, fontSize = 12.sp)
+                    Text("While sharing, this computer is kept awake so guests are not dropped. Closing the window keeps sharing in the tray.", color = Muted, fontSize = 12.sp)
                 }
             }
         }

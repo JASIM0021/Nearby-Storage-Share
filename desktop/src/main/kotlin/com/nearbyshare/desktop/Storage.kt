@@ -26,7 +26,7 @@ class Device(val id: String, name: String) {
                     return Device(o.getString("id"), o.getString("name"))
                 }
             }
-            val name = runCatching { InetAddress.getLocalHost().hostName }.getOrNull()?.takeIf { it.isNotBlank() } ?: "Windows PC"
+            val name = runCatching { InetAddress.getLocalHost().hostName }.getOrNull()?.takeIf { it.isNotBlank() } ?: "${Platform.osName} computer"
             val d = Device(UUID.randomUUID().toString(), name.take(40))
             file.writeText(JSONObject().put("id", d.id).put("name", d.name).toString())
             return d
